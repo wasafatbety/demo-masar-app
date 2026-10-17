@@ -453,7 +453,36 @@
                         <i class="fa-solid fa-user-shield" style="color: #8b5cf6;"></i>
                         <h3>الإدارة والمالية</h3>
                     </div>
+                    <div class="portal-card" style="grid-column: span 2; background: rgba(79, 70, 229, 0.15); border-color: var(--primary);" onclick="switchUserRole('unified')">
+                        <i class="fa-solid fa-right-to-bracket" style="color: #6366f1;"></i>
+                        <h3>بوابة الدخول الموحدة للجميع</h3>
+                    </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- VIEW: UNIFIED LOGIN FOR ALL ROLES -->
+        <div id="unifiedTab" class="view">
+            <div class="glass-card" style="text-align: center;">
+                <i class="fa-solid fa-shield-halved" style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"></i>
+                <h3 style="margin-bottom: 15px;">تسجيل الدخول الموحد</h3>
+                
+                <div class="form-group">
+                    <label>حدد الصفة / نوع الحساب:</label>
+                    <select id="unifiedRoleSelect" class="input-box" style="background: #1e1b4b;" onchange="toggleUnifiedFields()">
+                        <option value="student">طالب 🎓</option>
+                        <option value="parent">ولي أمر 👨‍👩‍👦</option>
+                        <option value="driver">سائق / مشرف 🚌</option>
+                        <option value="admin">إدارة ومالية 🛡️</option>
+                    </select>
+                </div>
+
+                <div id="unifiedInputFields"></div>
+
+                <button class="btn-submit" style="margin-top:15px;" onclick="executeUnifiedLogin()">
+                    <i class="fa-solid fa-right-to-bracket"></i> دخول المنظومة
+                </button>
+                <button class="btn-submit" style="background: rgba(255,255,255,0.08); margin-top: 10px;" onclick="switchUserRole('selector')">العودة للشاشة الرئيسية</button>
             </div>
         </div>
 
@@ -584,10 +613,16 @@
         <div id="scanTab" class="view">
             <div id="driverAuthCardScan" class="glass-card" style="text-align: center;">
                 <i class="fa-solid fa-bus" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
-                <h3 style="margin-bottom: 15px;">دخول السائق للماسح الضوئي</h3>
+                <h3 style="margin-bottom: 10px;">دخول / إنشاء حساب المشرف والسائق</h3>
+                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">أدخل رقم الحافلة وكلمة المرور للدخول، أو قم بإنشائهما لأول مرة مباشرة</p>
+                
                 <input type="text" id="busNumberInputScan" class="input-box" placeholder="رقم الحافلة / السائق (مثال: 100)" style="text-align: center; margin-bottom: 10px;">
-                <input type="password" id="driverPassScan" class="input-box" placeholder="كلمة مرور السائق" style="text-align: center; margin-bottom: 15px;">
-                <button class="btn-submit" onclick="authenticateDriver()">تأكيد الدخول للماسح</button>
+                <input type="password" id="driverPassScan" class="input-box" placeholder="كلمة المرور" style="text-align: center; margin-bottom: 10px;">
+                <input type="password" id="driverPassConfirmScan" class="input-box" placeholder="تأكيد كلمة المرور (عند التسجيل لأول مرة)" style="text-align: center; margin-bottom: 12px;">
+                
+                <button class="btn-submit" onclick="authenticateDriver()">
+                    <i class="fa-solid fa-lock"></i> تأكيد الدخول / تسجيل الحساب
+                </button>
                 <button class="btn-submit" style="background: rgba(255,255,255,0.08); margin-top: 10px;" onclick="switchUserRole('selector')">العودة للشاشة الرئيسية</button>
             </div>
 
@@ -1102,6 +1137,73 @@
                         <i class="fa-solid fa-magnifying-glass"></i> البحث المستقل للطلاب
                     </button>
                 `;
+            } else if (role === 'unified') {
+                document.getElementById('unifiedTab').classList.add('active');
+                document.getElementById('currentPageTitle').innerText = 'تسجيل الدخول الموحد';
+                toggleUnifiedFields();
+            }
+        }
+
+        function toggleUnifiedFields() {
+            const role = document.getElementById('unifiedRoleSelect').value;
+            const container = document.getElementById('unifiedInputFields');
+            container.innerHTML = '';
+
+            if (role === 'student') {
+                container.innerHTML = `
+                    <input type="text" id="uniStudentId" class="input-box" placeholder="أدخل كود الطالب (مثال: STD-1001)" style="text-align: center; margin-top: 10px;">
+                `;
+            } else if (role === 'parent') {
+                container.innerHTML = `
+                    <input type="tel" id="uniParentPhone" class="input-box" placeholder="رقم هاتف ولي الأمر" style="text-align: center; margin-top: 10px;">
+                    <input type="password" id="uniParentPass" class="input-box" placeholder="كلمة المرور" style="text-align: center; margin-top: 10px;">
+                `;
+            } else if (role === 'driver') {
+                container.innerHTML = `
+                    <input type="text" id="uniBusNum" class="input-box" placeholder="رقم الحافلة / المشرف" style="text-align: center; margin-top: 10px;">
+                    <input type="password" id="uniDriverPass" class="input-box" placeholder="كلمة المرور" style="text-align: center; margin-top: 10px;">
+                `;
+            } else if (role === 'admin') {
+                container.innerHTML = `
+                    <input type="email" id="uniAdminEmail" class="input-box" placeholder="البريد الإلكتروني للإدارة" style="text-align: center; margin-top: 10px;">
+                    <input type="password" id="uniAdminPass" class="input-box" placeholder="كلمة المرور" style="text-align: center; margin-top: 10px;">
+                `;
+            }
+        }
+
+        async function executeUnifiedLogin() {
+            const role = document.getElementById('unifiedRoleSelect').value;
+
+            if (role === 'student') {
+                const id = document.getElementById('uniStudentId').value.trim();
+                if(!id) return showCustomAlert("تنبيه", "أدخل كود الطالب!", "warning");
+                document.getElementById('studentLoginId').value = id;
+                switchUserRole('student');
+                loginStudentPortal();
+            } else if (role === 'parent') {
+                const phone = document.getElementById('uniParentPhone').value.trim();
+                const pass = document.getElementById('uniParentPass').value.trim();
+                if(!phone || !pass) return showCustomAlert("تنبيه", "أدخل الرقم وكلمة المرور!", "warning");
+                document.getElementById('parentPhoneInput').value = phone;
+                document.getElementById('parentPasswordInput').value = pass;
+                switchUserRole('parent');
+                loginOrRegisterParentPortal();
+            } else if (role === 'driver') {
+                const bus = document.getElementById('uniBusNum').value.trim();
+                const pass = document.getElementById('uniDriverPass').value.trim();
+                if(!bus || !pass) return showCustomAlert("تنبيه", "أدخل رقم الحافلة وكلمة المرور!", "warning");
+                document.getElementById('busNumberInputScan').value = bus;
+                document.getElementById('driverPassScan').value = pass;
+                switchUserRole('driver');
+                authenticateDriver();
+            } else if (role === 'admin') {
+                const email = document.getElementById('uniAdminEmail').value.trim();
+                const pass = document.getElementById('uniAdminPass').value.trim();
+                if(!email || !pass) return showCustomAlert("تنبيه", "أدخل بيانات الأدمن!", "warning");
+                document.getElementById('adminEmailInput').value = email;
+                document.getElementById('adminPass').value = pass;
+                switchUserRole('admin');
+                authenticateAdmin();
             }
         }
 
@@ -1243,7 +1345,8 @@
         async function authenticateDriver() {
             const busNum = document.getElementById('busNumberInputScan').value.trim();
             const pass = document.getElementById('driverPassScan').value.trim();
-            await checkDriverLogin(busNum, pass);
+            const confirmPass = document.getElementById('driverPassConfirmScan') ? document.getElementById('driverPassConfirmScan').value.trim() : '';
+            await checkDriverLogin(busNum, pass, confirmPass);
         }
 
         async function authenticateDriverLogs() {
@@ -1252,32 +1355,74 @@
             await checkDriverLogin(busNum, pass);
         }
 
-        async function checkDriverLogin(busNum, inputPass) {
+        async function checkDriverLogin(busNum, inputPass, confirmPass = '') {
             if (!busNum || !inputPass) return showCustomAlert("تنبيه", "أدخل رقم الحافلة وكلمة المرور!", 'warning');
 
-            let correctPass = "driver";
-
             try {
-                const driverSnap = await db.collection("settings").doc("driver").get();
-                if (driverSnap.exists && driverSnap.data().password) {
-                    correctPass = driverSnap.data().password;
+                const driverRef = db.collection("drivers").doc(busNum);
+                const driverSnap = await driverRef.get();
+
+                if (driverSnap.exists) {
+                    const driverData = driverSnap.data();
+                    if (driverData.password === inputPass) {
+                        currentBusNumber = busNum;
+                        document.getElementById('currentDriverBusTitle').innerText = busNum;
+                        document.getElementById('logsBusNumTitle').innerText = busNum;
+                        document.getElementById('btnBusNumTitle').innerText = busNum;
+
+                        document.getElementById('driverReportDate').value = todayStr;
+                        currentDriverReportDate = todayStr;
+                        document.getElementById('logsDateTitle').innerText = currentDriverReportDate;
+
+                        unlockDriverScreens();
+                        setupDriverAttendanceListener();
+                    } else {
+                        showCustomAlert("خطأ في الدخول", "كلمة المرور الخاصة بهذه الحافلة غير صحيحة!", 'error');
+                    }
+                } else {
+                    let globalDriverPass = "driver";
+                    try {
+                        const globalSnap = await db.collection("settings").doc("driver").get();
+                        if (globalSnap.exists && globalSnap.data().password) {
+                            globalDriverPass = globalSnap.data().password;
+                        }
+                    } catch(e){}
+
+                    if (inputPass === globalDriverPass) {
+                        currentBusNumber = busNum;
+                        document.getElementById('currentDriverBusTitle').innerText = busNum;
+                        document.getElementById('logsBusNumTitle').innerText = busNum;
+                        document.getElementById('btnBusNumTitle').innerText = busNum;
+                        unlockDriverScreens();
+                        setupDriverAttendanceListener();
+                        return;
+                    }
+
+                    if (inputPass.length < 4) {
+                        return showCustomAlert("كلمة مرور ضعيفة", "يجب ألا تقل كلمة المرور عن 4 رموز!", 'warning');
+                    }
+                    if (confirmPass && inputPass !== confirmPass) {
+                        return showCustomAlert("تنبيه", "كلمتا المرور غير متطابقتين!", 'warning');
+                    }
+
+                    await driverRef.set({
+                        busNumber: busNum,
+                        password: inputPass,
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+
+                    showCustomAlert("تم تسجيل الحساب", `تم إنشاء حساب المشرف/السائق للحافلة (${busNum}) بكلمة السر الجديدة بنجاح!`, 'success');
+
+                    currentBusNumber = busNum;
+                    document.getElementById('currentDriverBusTitle').innerText = busNum;
+                    document.getElementById('logsBusNumTitle').innerText = busNum;
+                    document.getElementById('btnBusNumTitle').innerText = busNum;
+                    unlockDriverScreens();
+                    setupDriverAttendanceListener();
                 }
-            } catch(e) {}
-
-            if (inputPass === correctPass) {
-                currentBusNumber = busNum;
-                document.getElementById('currentDriverBusTitle').innerText = busNum;
-                document.getElementById('logsBusNumTitle').innerText = busNum;
-                document.getElementById('btnBusNumTitle').innerText = busNum;
-
-                document.getElementById('driverReportDate').value = todayStr;
-                currentDriverReportDate = todayStr;
-                document.getElementById('logsDateTitle').innerText = currentDriverReportDate;
-
-                unlockDriverScreens();
-                setupDriverAttendanceListener();
-            } else {
-                showCustomAlert("خطأ في الدخول", "كلمة مرور السائق غير صحيحة!", 'error');
+            } catch(e) {
+                console.error(e);
+                showCustomAlert("خطأ", "حدث خطأ أثناء الاتصال بالسيرفر!", 'error');
             }
         }
 
@@ -1301,6 +1446,9 @@
 
             document.getElementById('driverPassScan').value = '';
             document.getElementById('driverPassLogs').value = '';
+            if (document.getElementById('driverPassConfirmScan')) {
+                document.getElementById('driverPassConfirmScan').value = '';
+            }
         }
 
         function toggleParentForgotPass(showForgot) {
@@ -1320,15 +1468,9 @@
 
             try {
                 const parentRef = db.collection("parents").doc(phone);
-                let parentSnap;
+                const parentSnap = await parentRef.get();
 
-                try {
-                    parentSnap = await parentRef.get();
-                } catch (e) {
-                    parentSnap = { exists: false };
-                }
-
-                if (parentSnap && parentSnap.exists) {
+                if (parentSnap.exists) {
                     const parentData = parentSnap.data();
                     if (parentData.password !== password) {
                         return showCustomAlert("خطأ في الدخول", "كلمة المرور لولي الأمر غير صحيحة!", 'error');
@@ -1365,7 +1507,7 @@
                 currentParentPhone = phone;
                 document.getElementById('parentAuthCard').style.display = 'none';
                 document.getElementById('parentPortalContent').style.display = 'block';
-                document.getElementById('parentPhoneTitle').innerText = `رقم ولي الأمر المتابع: ${phone}`;
+                document.getElementById('parentPhoneTitle').innerText = `رقم المسجل: ${phone}`;
                 document.getElementById('parentEmailTitle').innerText = email ? `البريد الإلكتروني: ${email}` : (parentSnap.exists && parentSnap.data().email ? `البريد الإلكتروني: ${parentSnap.data().email}` : 'البريد الإلكتروني: غير مسجل');
 
                 requestNotificationPermission();
@@ -1474,7 +1616,7 @@
                     `;
                     container.appendChild(card);
                 });
-            });
+            }, (err) => { console.error(err); });
         }
 
         function setupParentNotificationsListener(phone) {
@@ -1524,7 +1666,7 @@
                         `;
                         list.appendChild(card);
                     });
-                });
+                }, (err) => { console.error(err); });
         }
 
         async function loginStudentPortal() {
@@ -1879,7 +2021,7 @@
                         `;
                         logsList.prepend(item);
                     });
-                });
+                }, (err) => { console.error(err); });
         }
 
         function exportDriverTodayReport() {
@@ -2080,7 +2222,7 @@
                         `;
                         busesContainer.appendChild(item);
                     });
-                });
+                }, (err) => { console.error(err); });
         }
 
         async function exportSingleBusReport(busNum) {
@@ -2620,47 +2762,78 @@
 
         function shareApp() {
             toggleSidebar();
+            const webUrl = 'https://wasafatbety.github.io/masar-app/';
+            const downloadUrl = 'https://www.appcreator24.com/app4201237-z4ija2';
+            
+            const shareText = 
+`🚌✨ *منظومة مسار بلس | Masar Plus* ✨🚌
+المنظومة الذكية الأولى لإدارة الحافلات وحضور الطلاب وتتبع الأقساط والمالية! 🚀
+
+📌 *مميزات التطبيق:*
+🔹 متابعة لحظية لصعود الأبناء للحافلة وتنبيهات فورية لولي الأمر 📱
+🔹 كارت باركود ذكي ومؤمن لكل طالب 🎫
+🔹 إدارة الحافلات وسجلات الحضور والتقارير بكل سهولة 📊
+🔹 واجهات مخصصة (للطلاب، أولياء الأمور، السائقين، والإدارة) 🛡️
+
+🌐 *تصفح الموقع الرسمي للمنظومة:*
+${webUrl}
+
+📥 *رابط تحميل التطبيق المباشر (APK):*
+${downloadUrl}
+
+💡 شارك التطبيق فقط للمشتركين(الطلاب-أولياء الأمور)ولكل من له صفة بالمؤسسه! ❤️`;
+
             const shareData = {
                 title: 'تطبيق مسار بلس لإدارة الحافلات والتحقق الذكي',
-                text: 'حمل منظومة مسار بلس الذكية لمتابعة اشتراكات الحافلات وتلقي التنبيهات الفورية:',
-                url: 'https://www.appcreator24.com/app4201237-z4ija2'
+                text: shareText,
+                url: webUrl
             };
-            if (navigator.share) { navigator.share(shareData).catch(() => {}); }
-            else { window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareData.text + " " + shareData.url)}`, '_blank'); }
+
+            if (navigator.share) {
+                navigator.share(shareData).catch(() => {});
+            } else if (navigator.clipboard && window.isSecureContext) {
+                navigator.clipboard.writeText(shareText).then(() => {
+                    showCustomAlert("✨ تم النسخ", "تم نسخ رسالة المشاركة والتحميل بكافة التفاصيل والروابط إلى الحافظة بنجاح!", "success");
+                }).catch(() => {
+                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+                });
+            } else {
+                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+            }
         }
     </script>
-<script>
-    window.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }, true);
+    <script>
+        window.addEventListener('contextmenu', function (e) {
+            e.preventDefault();
+            e.stopPropagation();
+            return false;
+        }, true);
 
-    window.addEventListener('keydown', function (e) {
-        if (e.keyCode === 123) {
-            e.preventDefault();
-            return false;
-        }
-        if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
-            e.preventDefault();
-            return false;
-        }
-        if (e.ctrlKey && e.keyCode === 85) {
-            e.preventDefault();
-            return false;
-        }
-        if (e.ctrlKey && e.keyCode === 83) {
-            e.preventDefault();
-            return false;
-        }
-    }, true);
+        window.addEventListener('keydown', function (e) {
+            if (e.keyCode === 123) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode === 85) {
+                e.preventDefault();
+                return false;
+            }
+            if (e.ctrlKey && e.keyCode === 83) {
+                e.preventDefault();
+                return false;
+            }
+        }, true);
 
-    document.addEventListener('selectstart', function(e) {
-        e.preventDefault();
-    });
-    document.addEventListener('dragstart', function(e) {
-        e.preventDefault();
-    });
-</script>
+        document.addEventListener('selectstart', function(e) {
+            e.preventDefault();
+        });
+        document.addEventListener('dragstart', function(e) {
+            e.preventDefault();
+        });
+    </script>
 </body>
 </html>
