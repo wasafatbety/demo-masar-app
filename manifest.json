@@ -1,19 +1,19 @@
 {
-  "name": "اسم التطبيق الكامل",
-  "short_name": "اسم التطبيق",
-  "description": "وصف قصير للتطبيق",
+  "name": "مسار (Masar System)",
+  "short_name": "Masar System",
+  "description": "تطبيق مسار (Masar System) هو المنظومة الشاملة لإدارة نقل الطلاب والحافلات المدرسية والجامعية، ويتكون التطبيق من عدة واجهات مترابطة تعمل عبر نظام سحابي موحد",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#ffffff",
   "theme_color": "#ffffff",
   "icons": [
     {
-      "src": "icon-192.png",
+      "src": "192.png",
       "sizes": "192x192",
       "type": "image/png"
     },
     {
-      "src": "icon-512.png",
+      "src": "512.png",
       "sizes": "512x512",
       "type": "image/png"
     }
