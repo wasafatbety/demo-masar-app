@@ -881,21 +881,21 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
-        // FIREBASE CONFIGURATION
-        const firebaseConfig = {
-            apiKey: "AIzaSyDummyKeyForMasarPlusApp2026",
-            authDomain: "masar-plus-app.firebaseapp.com",
-            projectId: "masar-plus-app",
-            storageBucket: "masar-plus-app.appspot.com",
-            messagingSenderId: "1234567890",
-            appId: "1:1234567890:web:masarplusapp2026"
-        };
+       // FIREBASE CONFIGURATION (المفاتيح الحقيقية للمشروع)
+const firebaseConfig = {
+    apiKey: "AIzaSyC3by9pDLnTFF6_vCikwe7skPVvfpic0EI",
+    authDomain: "mag-university-bus.firebaseapp.com",
+    projectId: "mag-university-bus",
+    storageBucket: "mag-university-bus.firebasestorage.app",
+    messagingSenderId: "582467991021",
+    appId: "1:582467991021:web:aec447e281ba85cc06a3e4" // معالج للويب بنفس معرّف التطبيق
+};
 
-        if (!firebase.apps.length) {
-            firebase.initializeApp(firebaseConfig);
-        }
-        const db = firebase.firestore();
-        const auth = firebase.auth();
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+const auth = firebase.auth();
 
         // APP STATE
         let currentRole = 'selector';
@@ -1304,21 +1304,55 @@
         }
 
         // ADMIN PORTAL LOGIC & ACTIVATION CODE
-        function registerFirstAdmin() {
-            const email = document.getElementById('adminEmailInput').value.trim();
-            const pass = document.getElementById('adminPass').value.trim();
-            const activationCode = document.getElementById('adminActivationCodeInput').value.trim();
+        // دالة جلب كود التفعيل المباشر من قواعد بيانات Firestore
+async function getActivationKeyFromServer() {
+    try {
+        const configDoc = await db.collection("settings").doc("app_config").get();
+        if (configDoc.exists && configDoc.data() && configDoc.data().activationCode) {
+            return configDoc.data().activationCode.trim();
+        }
+    } catch(e) {
+        console.error("خطأ في قراءة كود التفعيل من السيرفر:", e);
+    }
+    // الكود الاحتياطي في حال عدم وجود مستند في Firestore
+    return "MASAR2026";
+}
 
-            if (!email || !pass) {
-                showAlert('تنبيه', 'يرجى إدخال البريد الإلكتروني وكلمة المرور أولاً', 'warning');
-                return;
-            }
+// دالة تسجيل الأدمن لأول مرة المصححة
+async function registerFirstAdmin() {
+    const email = document.getElementById('adminEmailInput').value.trim();
+    const pass = document.getElementById('adminPass').value.trim();
+    const activationCode = document.getElementById('adminActivationCodeInput').value.trim();
 
-            // التحقق من كود التفعيل المخصص لحماية التسجيل
-            if (activationCode !== 'MASAR2026') {
-                showAlert('خطأ في التفعيل', 'كود التفعيل المخصص غير صحيح! لا يمكن إنشاء حساب أدمن جديد بدونه.', 'error');
-                return;
-            }
+    if (!email || !pass) {
+        showAlert('تنبيه', 'يرجى إدخال البريد الإلكتروني وكلمة المرور أولاً', 'warning');
+        return;
+    }
+
+    if (!activationCode) {
+        showAlert('تنبيه', 'يرجى إدخال كود التفعيل المخصص', 'warning');
+        return;
+    }
+
+    // التحقق من كود التفعيل المعتمد
+    const validCode = await getActivationKeyFromServer();
+
+    if (activationCode !== validCode) {
+        showAlert('خطأ في التفعيل', 'كود التفعيل المخصص غير صحيح! لا يمكن إنشاء حساب أدمن جديد بدونه.', 'error');
+        return;
+    }
+
+    // إنشاء حساب الإدارة عبر Firebase Auth
+    auth.createUserWithEmailAndPassword(email, pass).then(userCred => {
+        showAlert('تم الإنشاء', 'تم إنشاء حساب الإدارة بنجاح وتسجيل الدخول', 'success');
+        activeAdminEmail = email;
+        document.getElementById('adminAuthCard').style.display = 'none';
+        document.getElementById('adminPanelContent').style.display = 'block';
+        loadAdminStudents();
+    }).catch(err => {
+        showAlert('خطأ في إنشاء الحساب', err.message, 'error');
+    });
+}
 
             auth.createUserWithEmailAndPassword(email, pass).then(userCred => {
                 showAlert('تم الإنشاء', 'تم إنشاء حساب الإدارة بنجاح وتسجيل الدخول', 'success');
