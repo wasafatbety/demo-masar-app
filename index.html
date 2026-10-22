@@ -2159,6 +2159,17 @@ async function getActivationKeyFromServer() {
             if (type === 'privacy') showAlert('سياسة الخصوصية', 'جميع البيانات مشفرة ومحفوظة عبر قواعد بيانات سحابية عالية الأمان.', 'info');
         }
     </script>
+<script>
+    window.addEventListener('contextmenu', e => { e.preventDefault(); return false; }, true);
+    window.addEventListener('keydown', e => {
+        if (e.keyCode === 123 || (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74)) || (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
+            e.preventDefault();
+            return false;
+        }
+    }, true);
+    document.addEventListener('selectstart', e => e.preventDefault());
+    document.addEventListener('dragstart', e => e.preventDefault());
+</script>
 
 <!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
 <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
