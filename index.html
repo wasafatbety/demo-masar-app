@@ -18,6 +18,7 @@
     });
   }
 </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>مسار بلس | Masar Plus - المنظومة الذكية الموحدة للحافلات</title>
@@ -34,6 +35,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-auth-compat.js"></script>
+    <!-- Firebase App Check SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.23.0/firebase-app-check-compat.js"></script>
     
     <style>
         :root {
@@ -297,7 +300,6 @@
         .btn-unbind { background: #0284c7; }
         .btn-delete { background: var(--danger); }
         .btn-pay { background: #10b981; }
-        .btn-edit { background: #6366f1; }
 
         .modal-overlay {
             display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0;
@@ -305,7 +307,7 @@
         }
         .modal-body {
             background: #1e1b4b; border: 1px solid var(--card-border); border-radius: 16px; padding: 20px;
-            width: 100%; max-width: 500px; max-height: 85vh; display: flex; flex-direction: column; overflow-y: auto;
+            width: 100%; max-width: 500px; max-height: 80vh; display: flex; flex-direction: column; overflow-y: auto;
         }
         .modal-body textarea {
             width: 100%; height: 220px; background: rgba(0,0,0,0.3); border: 1px solid var(--card-border);
@@ -340,28 +342,6 @@
         .custom-dialog-msg { font-size: 0.88rem; color: var(--text-muted); line-height: 1.5; margin-bottom: 20px; white-space: pre-line; }
         .custom-dialog-btns { display: flex; gap: 10px; justify-content: center; }
 
-        .due-warning-banner {
-            background: rgba(245, 158, 11, 0.2);
-            border: 1px solid var(--warning);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: #fef08a;
-        }
-
-        .due-danger-banner {
-            background: rgba(239, 68, 68, 0.2);
-            border: 1px solid var(--danger);
-            border-radius: 12px;
-            padding: 12px;
-            margin-bottom: 15px;
-            text-align: center;
-            font-size: 0.85rem;
-            color: #fca5a5;
-        }
-
         @media (max-width: 380px) {
             .container { padding: 10px; }
             .collapsible-header { padding: 14px 14px; }
@@ -376,7 +356,7 @@
 
     <header>
         <div class="header-right">
-            <button id="mainSidebarToggleBtn" class="menu-toggle-btn" style="display: none;" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
+            <button class="menu-toggle-btn" onclick="toggleSidebar()"><i class="fa-solid fa-bars"></i></button>
             <div class="brand-title">
                 <svg class="brand-logo-svg" viewBox="0 0 100 100" fill="none">
                     <rect width="100" height="100" rx="28" fill="url(#brand_grad)"></rect>
@@ -421,7 +401,9 @@
             </button>
 
             <div class="sidebar-menu-title" id="roleSectionTitle">الخدمات المتاحة</div>
-            <div id="dynamicNavItems"></div>
+            <div id="dynamicNavItems">
+                <!-- يتم تحميل القائمة ديناميكياً حسب نوع المستخدم -->
+            </div>
 
             <div class="sidebar-menu-title">معلومات وتواصل</div>
             <button class="nav-item" onclick="openInfoModal('about')">
@@ -446,7 +428,7 @@
 
     <div class="container">
 
-        <!-- VIEW SELECTOR -->
+        <!-- VIEW SELECTOR: شاشة اختيار نوع الواجهة الرئيسية -->
         <div id="portalSelectorTab" class="view active">
             <div class="glass-card" style="text-align: center;">
                 <i class="fa-solid fa-graduation-cap" style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"></i>
@@ -470,36 +452,7 @@
                         <i class="fa-solid fa-user-shield" style="color: #8b5cf6;"></i>
                         <h3>الإدارة والمالية</h3>
                     </div>
-                    <div class="portal-card" style="grid-column: span 2; background: rgba(79, 70, 229, 0.15); border-color: var(--primary);" onclick="switchUserRole('unified')">
-                        <i class="fa-solid fa-right-to-bracket" style="color: #6366f1;"></i>
-                        <h3>بوابة الدخول الموحدة للجميع</h3>
-                    </div>
                 </div>
-            </div>
-        </div>
-
-        <!-- VIEW: UNIFIED LOGIN FOR ALL ROLES -->
-        <div id="unifiedTab" class="view">
-            <div class="glass-card" style="text-align: center;">
-                <i class="fa-solid fa-shield-halved" style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"></i>
-                <h3 style="margin-bottom: 15px;">تسجيل الدخول الموحد</h3>
-                
-                <div class="form-group">
-                    <label>حدد الصفة / نوع الحساب:</label>
-                    <select id="unifiedRoleSelect" class="input-box" style="background: #1e1b4b;" onchange="toggleUnifiedFields()">
-                        <option value="student">طالب 🎓</option>
-                        <option value="parent">ولي أمر 👨‍👩‍👦</option>
-                        <option value="driver">سائق / مشرف 🚌</option>
-                        <option value="admin">إدارة ومالية 🛡️</option>
-                    </select>
-                </div>
-
-                <div id="unifiedInputFields"></div>
-
-                <button class="btn-submit" style="margin-top:15px;" onclick="executeUnifiedLogin()">
-                    <i class="fa-solid fa-right-to-bracket"></i> دخول المنظومة
-                </button>
-                <button class="btn-submit" style="background: rgba(255,255,255,0.08); margin-top: 10px;" onclick="switchUserRole('selector')">العودة للشاشة الرئيسية</button>
             </div>
         </div>
 
@@ -514,16 +467,13 @@
             </div>
 
             <div id="studentPortalContent" class="glass-card" style="display: none; text-align: center;">
-                <div id="studentDueNoticeBanner"></div>
                 <h2 id="studentCardName" style="font-size: 1.3rem; color: #ffffff;">---</h2>
                 <p id="studentCardId" style="font-size: 0.85rem; color: var(--text-muted);">---</p>
                 <div style="margin: 10px 0;">
                     <span id="studentCardStatus" style="padding: 4px 12px; border-radius: 12px; font-weight: bold; font-size: 0.8rem;">---</span>
                 </div>
 
-                <div id="qrcodeCanvasContainer">
-                    <div id="qrcodeCanvas"></div>
-                </div>
+                <div id="qrcodeCanvas"></div>
                 <p style="font-size: 0.75rem; color: var(--warning);"><i class="fa-solid fa-lock"></i> كارت مخصص ومقترن بـ هاتف الطالب فقط</p>
 
                 <button class="btn-submit" style="background: rgba(255,255,255,0.1); margin-top: 15px;" onclick="logoutStudentPortal()">خروج</button>
@@ -534,49 +484,18 @@
         <div id="parentTab" class="view">
             <div id="parentAuthCard" class="glass-card" style="text-align: center;">
                 <i class="fa-solid fa-user-nurse" style="font-size: 3rem; color: var(--success); margin-bottom: 10px;"></i>
-                <h3 style="margin-bottom: 10px;">دخول / إنشاء حساب ولي الأمر</h3>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">ادخل رقم الهاتف وكلمة المرور للدخول، أو قم بإنشائهما لأول مرة مباشرة</p>
-                
-                <input type="tel" id="parentPhoneInput" class="input-box" placeholder="رقم هاتف ولي الأمر (مثال: 01012345678)" style="text-align: center; margin-bottom: 10px;">
-                <input type="email" id="parentEmailInput" class="input-box" placeholder="البريد الإلكتروني (لتفعيل الرسائل والإشعارات)" style="text-align: center; margin-bottom: 10px;">
-                <input type="password" id="parentPasswordInput" class="input-box" placeholder="كلمة المرور الخاصة بك" style="text-align: center; margin-bottom: 10px;">
-                <input type="password" id="parentPasswordConfirmInput" class="input-box" placeholder="تأكيد كلمة المرور (عند إنشاء حساب جديد)" style="text-align: center; margin-bottom: 12px;">
-                
-                <button class="btn-submit" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="loginOrRegisterParentPortal()">
-                    <i class="fa-solid fa-lock"></i> دخول / إنشاء الحساب وتفعيل المتابعة
+                <h3 style="margin-bottom: 15px;">دخول ولي الأمر للمتابعة والمالية</h3>
+                <input type="text" id="parentPhoneInput" class="input-box" placeholder="أدخل رقم هاتف ولي الأمر (مثال: 01012345678)" style="text-align: center; margin-bottom: 15px;">
+                <button class="btn-submit" style="background: linear-gradient(135deg, #10b981, #059669);" onclick="loginParentPortal()">
+                    <i class="fa-solid fa-bell"></i> تفعيل المتابعة والاطلاع على الملف المالي
                 </button>
-
-                <div style="margin-top: 12px;">
-                    <a href="javascript:void(0)" onclick="toggleParentForgotPass(true)" style="color: var(--warning); font-size: 0.85rem; text-decoration: none; font-weight: bold;">
-                        <i class="fa-solid fa-key"></i> هل نسيت كلمة المرور؟
-                    </a>
-                </div>
-
-                <button class="btn-submit" style="background: rgba(255,255,255,0.08); margin-top: 15px;" onclick="switchUserRole('selector')">العودة للشاشة الرئيسية</button>
-            </div>
-
-            <div id="parentForgotCard" class="glass-card" style="display: none; text-align: center;">
-                <i class="fa-solid fa-unlock-keyhole" style="font-size: 2.8rem; color: var(--warning); margin-bottom: 10px;"></i>
-                <h3 style="margin-bottom: 10px; color: var(--warning);">استعادة كلمة المرور لولي الأمر</h3>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:15px;">أدخل رقم الهاتف والبريد الإلكتروني المسجلين لإعادة تعيين كلمة المرور</p>
-
-                <input type="tel" id="resetParentPhone" class="input-box" placeholder="رقم الهاتف المسجل" style="text-align: center; margin-bottom: 10px;">
-                <input type="email" id="resetParentEmail" class="input-box" placeholder="البريد الإلكتروني المسجل" style="text-align: center; margin-bottom: 10px;">
-                <input type="password" id="resetParentNewPass" class="input-box" placeholder="كلمة المرور الجديدة" style="text-align: center; margin-bottom: 15px;">
-
-                <button class="btn-submit" style="background: linear-gradient(135deg, #f59e0b, #d97706);" onclick="resetParentPassword()">
-                    <i class="fa-solid fa-arrows-rotate"></i> إعادة تعيين كلمة المرور
-                </button>
-                <button class="btn-submit" style="background: rgba(255,255,255,0.08); margin-top: 10px;" onclick="toggleParentForgotPass(false)">
-                    إلغاء والعودة لصفحة الدخول
-                </button>
+                <button class="btn-submit" style="background: rgba(255,255,255,0.08); margin-top: 10px;" onclick="switchUserRole('selector')">العودة للشاشة الرئيسية</button>
             </div>
 
             <div id="parentPortalContent" style="display: none;">
                 <div class="glass-card" style="text-align: center; background: rgba(16, 185, 129, 0.1); border-color: rgba(16, 185, 129, 0.3);">
                     <h3 style="font-size: 1.1rem; color: var(--success);"><span class="pulse-live"></span> المتابعة اللحظية لـ ولي الأمر</h3>
                     <p id="parentPhoneTitle" style="font-size: 0.85rem; color: var(--text-muted); margin-top: 4px;">رقم المسجل: ---</p>
-                    <p id="parentEmailTitle" style="font-size: 0.75rem; color: var(--text-muted);">---</p>
                     <button class="btn-sm btn-delete" style="margin-top: 10px;" onclick="logoutParentPortal()">خروج</button>
                 </div>
 
@@ -596,7 +515,7 @@
             </div>
         </div>
 
-        <!-- SEARCH PAGE -->
+        <!-- NEW VIEW: INDEPENDENT SEARCH PAGE -->
         <div id="searchTab" class="view">
             <div class="glass-card" style="border-color: var(--primary);">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
@@ -626,20 +545,14 @@
             </div>
         </div>
 
-        <!-- VIEW 2: SCANNER -->
+        <!-- VIEW 2: SCANNER (DRIVER ISOLATED BY BUS ID) -->
         <div id="scanTab" class="view">
             <div id="driverAuthCardScan" class="glass-card" style="text-align: center;">
                 <i class="fa-solid fa-bus" style="font-size: 2.5rem; color: var(--primary); margin-bottom: 10px;"></i>
-                <h3 style="margin-bottom: 10px;">دخول / إنشاء حساب المشرف والسائق</h3>
-                <p style="font-size:0.8rem; color:var(--text-muted); margin-bottom:12px;">أدخل رقم الحافلة وكلمة المرور للدخول، أو قم بإنشائهما لأول مرة مباشرة</p>
-                
+                <h3 style="margin-bottom: 15px;">دخول السائق للماسح الضوئي</h3>
                 <input type="text" id="busNumberInputScan" class="input-box" placeholder="رقم الحافلة / السائق (مثال: 100)" style="text-align: center; margin-bottom: 10px;">
-                <input type="password" id="driverPassScan" class="input-box" placeholder="كلمة المرور" style="text-align: center; margin-bottom: 10px;">
-                <input type="password" id="driverPassConfirmScan" class="input-box" placeholder="تأكيد كلمة المرور (عند التسجيل لأول مرة)" style="text-align: center; margin-bottom: 12px;">
-                
-                <button class="btn-submit" onclick="authenticateDriver()">
-                    <i class="fa-solid fa-lock"></i> تأكيد الدخول / تسجيل الحساب
-                </button>
+                <input type="password" id="driverPassScan" class="input-box" placeholder="كلمة مرور السائق" style="text-align: center; margin-bottom: 15px;">
+                <button class="btn-submit" onclick="authenticateDriver()">تأكيد الدخول للماسح</button>
                 <button class="btn-submit" style="background: rgba(255,255,255,0.08); margin-top: 10px;" onclick="switchUserRole('selector')">العودة للشاشة الرئيسية</button>
             </div>
 
@@ -695,20 +608,14 @@
             </div>
 
             <div id="driverLogsContent" style="display: none;">
-                <div class="glass-card" style="margin-bottom: 10px; padding: 12px;">
-                    <label style="color: var(--warning); font-size: 0.85rem;"><i class="fa-solid fa-calendar-day"></i> اختر تاريخ التقرير للحافلة:</label>
-                    <input type="date" id="driverReportDate" class="input-box" style="margin-top: 5px; padding: 10px;" onchange="updateDriverReportDate()">
-                </div>
-                
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                     <button class="btn-submit btn-excel" style="width: auto; flex: 1; margin-bottom: 0; margin-left: 10px;" onclick="exportDriverTodayReport()">
                         <i class="fa-solid fa-file-excel"></i> تصدير تقرير ركاب حافلة (<span id="btnBusNumTitle">---</span>)
                     </button>
                     <button onclick="logoutDriver()" class="btn-sm btn-delete" style="padding: 12px 15px; font-weight: bold;">خروج</button>
                 </div>
-                
                 <div class="glass-card" style="margin-top: 10px;">
-                    <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);"><i class="fa-solid fa-list-check"></i> ركاب حافلة رقم (<span id="logsBusNumTitle" style="color:var(--warning);">---</span>) - <span id="logsDateTitle">اليوم</span></h3>
+                    <h3 style="margin-bottom: 15px; font-size: 1.1rem; color: var(--primary);"><i class="fa-solid fa-list-check"></i> ركاب حافلة رقم (<span id="logsBusNumTitle" style="color:var(--warning);">---</span>) - اليوم</h3>
                     <div id="logsList"><p style="text-align: center; color: var(--text-muted);">جاري تحميل السجلات...</p></div>
                 </div>
             </div>
@@ -734,17 +641,14 @@
 
             <div id="adminContent" style="display: none;">
 
-                <div class="glass-card" style="margin-bottom: 15px; padding: 12px;">
-                    <label style="color: var(--warning); font-weight: bold;"><i class="fa-solid fa-calendar-day"></i> اختر تاريخ التقارير وسجلات الحضور لطباعتها وعرضها:</label>
-                    <input type="date" id="adminReportDate" class="input-box" style="margin-top: 8px; background: #1e1b4b;" onchange="updateAdminReportDate()">
-                </div>
-
+                <!-- 🗂️ 1. التقرير المالي العام المفصول للترمين -->
                 <div class="collapsible-card active">
                     <div class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h3 style="color: var(--warning);"><i class="fa-solid fa-chart-line"></i> التقرير المالي العام المفصول للترمين</h3>
                         <i class="fa-solid fa-chevron-down collapsible-icon"></i>
                     </div>
                     <div class="collapsible-content">
+                        <!-- 🟢 مالي الترم الأول -->
                         <div style="background: rgba(0,0,0,0.25); padding: 12px; border-radius: 14px; margin-bottom: 12px; border: 1px solid rgba(16, 185, 129, 0.4);">
                             <h4 style="color: #10b981; font-size: 0.95rem; margin-bottom: 8px;"><i class="fa-solid fa-coins"></i> مالي: الترم الأول 🟢</h4>
                             <div class="stats-grid">
@@ -755,6 +659,7 @@
                             </div>
                         </div>
 
+                        <!-- 🔵 مالي الترم الثاني -->
                         <div style="background: rgba(0,0,0,0.25); padding: 12px; border-radius: 14px; border: 1px solid rgba(14, 165, 233, 0.4);">
                             <h4 style="color: #0ea5e9; font-size: 0.95rem; margin-bottom: 8px;"><i class="fa-solid fa-coins"></i> مالي: الترم الثاني 🔵</h4>
                             <div class="stats-grid">
@@ -767,6 +672,7 @@
                     </div>
                 </div>
 
+                <!-- 🗂️ 2. إعدادات الفصل والإحصائيات -->
                 <div class="collapsible-card">
                     <div class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h3 style="color: var(--warning);"><i class="fa-solid fa-graduation-cap"></i> إعدادات الفصل والإحصائيات الحالية</h3>
@@ -783,11 +689,12 @@
                         <div class="stats-grid" style="margin-top: 15px;">
                             <div class="stat-box"><h3 id="statTotal">0</h3><p id="statTotalLabel">طلاب الترم المعروض</p></div>
                             <div class="stat-box"><h3 id="statActive" style="color: var(--success);">0</h3><p>المفعلين</p></div>
-                            <div class="stat-box" style="grid-column: span 2;"><h3 id="statToday" style="color: var(--warning);">0</h3><p>حضور اليوم المحدد</p></div>
+                            <div class="stat-box" style="grid-column: span 2;"><h3 id="statToday" style="color: var(--warning);">0</h3><p>حضور اليوم الكلي</p></div>
                         </div>
                     </div>
                 </div>
 
+                <!-- 🗂️ 🔑 تغيير كلمة السر للإدارة والإشراف -->
                 <div class="collapsible-card">
                     <div class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h3 style="color: var(--warning);"><i class="fa-solid fa-key"></i> تغيير كلمة السر للإدارة والإشراف</h3>
@@ -822,9 +729,10 @@
                     </div>
                 </div>
 
+                <!-- 🗂️ 3. تقارير الحافلات المنفصلة -->
                 <div class="collapsible-card">
                     <div class="collapsible-header" onclick="toggleCollapsible(this)">
-                        <h3 style="color: var(--warning);"><i class="fa-solid fa-bus-simple"></i> تقارير الحافلات المنفصلة (لليوم المحدد)</h3>
+                        <h3 style="color: var(--warning);"><i class="fa-solid fa-bus-simple"></i> تقارير الحافلات المنفصلة (اليوم)</h3>
                         <i class="fa-solid fa-chevron-down collapsible-icon"></i>
                     </div>
                     <div class="collapsible-content">
@@ -834,6 +742,7 @@
                     </div>
                 </div>
 
+                <!-- 🗂️ 4. إضافة / تجديد اشتراك وملف مالي -->
                 <div class="collapsible-card">
                     <div class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h3 style="color: var(--primary);"><i class="fa-solid fa-user-plus"></i> إضافة / تجديد اشتراك وملف مالي لطالب</h3>
@@ -865,6 +774,7 @@
                     </div>
                 </div>
 
+                <!-- 🗂️ 5. الانتقال لصفحة البحث المنفصلة -->
                 <div class="collapsible-card">
                     <div class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h3 style="color: var(--primary);"><i class="fa-solid fa-magnifying-glass-dollar"></i> محرك البحث المستقل الشامل</h3>
@@ -873,11 +783,12 @@
                     <div class="collapsible-content" style="text-align: center;">
                         <p style="color:var(--text-muted); font-size:0.8rem; margin-bottom:12px;">للبحث المنفرد بالاسم أو كود الطالب وتصفية نتائج الأترام في صفحة مستقلة وإضافة الأقساط:</p>
                         <button class="btn-submit" onclick="navigateTo('searchTab', 'البحث المستقل للطلاب والمالية')">
-                            <i class="fa-solid fa-square-poll-vertical"></i> الانتقال لصفحة البحث المستقلة
+                            <i class="fa-solid fa-square-poll-vertical"></i> الانتقال لصفحة البحث المنفصلة
                         </button>
                     </div>
                 </div>
 
+                <!-- 🗂️ 6. خيارات التقارير والسجلات المالية -->
                 <div class="collapsible-card">
                     <div class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h3 style="color: var(--primary);"><i class="fa-solid fa-file-export"></i> خيارات التقارير والسجلات المالية</h3>
@@ -893,8 +804,8 @@
                         <button class="btn-submit btn-all" onclick="exportFinancialsToExcel('الكل')">
                             <i class="fa-solid fa-database"></i> تصدير التقرير المالي العام الشامل
                         </button>
-                        <button class="btn-submit btn-excel" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="exportAttendanceToExcel('specific_date')">
-                            <i class="fa-solid fa-calendar-day"></i> تصدير سجل الحضور الكلي (لليوم المحدد)
+                        <button class="btn-submit btn-excel" style="background: linear-gradient(135deg, #8b5cf6, #6d28d9);" onclick="exportAttendanceToExcel('today')">
+                            <i class="fa-solid fa-calendar-day"></i> تصدير سجل اليوم الكلي (جميع الحافلات)
                         </button>
                         <button class="btn-submit btn-month" onclick="exportAttendanceToExcel('semester1')">
                             <i class="fa-solid fa-bookmark"></i> تصدير سجل حضور (الترم الأول)
@@ -908,6 +819,7 @@
                     </div>
                 </div>
 
+                <!-- 🗂️ 7. إدارة كافة الطلاب والملف المالي -->
                 <div class="collapsible-card active">
                     <div class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h3 style="color: var(--primary);"><i class="fa-solid fa-users"></i> إدارة كافة الطلاب والملف المالي</h3>
@@ -943,67 +855,6 @@
             <button class="btn-submit" onclick="confirmStudentActivation()" style="background: linear-gradient(135deg, #10b981, #059669);">
                 <i class="fa-solid fa-check-circle"></i> موافقة وتفعيل الكارت على هذا الهاتف
             </button>
-        </div>
-    </div>
-
-    <!-- EDIT STUDENT MODAL -->
-    <div id="editStudentModal" class="modal-overlay">
-        <div class="modal-body">
-            <h3 style="color: white; font-size: 1.15rem; margin-bottom: 15px; text-align: center;">
-                <i class="fa-solid fa-user-pen" style="color:var(--primary);"></i> تعديل بيانات الطالب
-            </h3>
-            
-            <input type="hidden" id="editOriginalStudentId">
-
-            <div class="form-group">
-                <label>كود الطالب (ID)</label>
-                <input type="text" id="editStudentId" class="input-box">
-            </div>
-
-            <div class="form-group">
-                <label>اسم الطالب الثلاثي</label>
-                <input type="text" id="editStudentName" class="input-box">
-            </div>
-
-            <div class="form-group">
-                <label>رقم هاتف ولي الأمر</label>
-                <input type="tel" id="editParentPhone" class="input-box">
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="form-group">
-                    <label>إجمالي الاشتراك (ج.م)</label>
-                    <input type="number" id="editFeeTotal" class="input-box">
-                </div>
-                <div class="form-group">
-                    <label>المبلغ المدفوع (ج.م)</label>
-                    <input type="number" id="editFeePaid" class="input-box">
-                </div>
-            </div>
-
-            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
-                <div class="form-group">
-                    <label>الخصم الممنوح (ج.م)</label>
-                    <input type="number" id="editFeeDiscount" class="input-box">
-                </div>
-                <div class="form-group">
-                    <label>تاريخ استحقاق القسط</label>
-                    <input type="date" id="editDueDate" class="input-box">
-                </div>
-            </div>
-
-            <div class="form-group">
-                <label>الفصل الدراسي</label>
-                <select id="editStudentSemester" class="input-box" style="background:#1e1b4b;">
-                    <option value="الترم الأول">الترم الأول 🟢</option>
-                    <option value="الترم الثاني">الترم الثاني 🔵</option>
-                </select>
-            </div>
-
-            <button class="btn-submit" onclick="saveStudentEdits()">
-                <i class="fa-solid fa-floppy-disk"></i> حفظ والتحديث بالسيرفر
-            </button>
-            <button class="btn-submit" style="background: rgba(255,255,255,0.1); margin-top: 8px;" onclick="closeEditStudentModal()">إلغاء</button>
         </div>
     </div>
 
@@ -1071,10 +922,19 @@
         };
 
         firebase.initializeApp(firebaseConfig);
+
+        // --- بداية كود تفعيل Firebase App Check المحمي بمفتاحك ---
+        const appCheck = firebase.appCheck();
+        appCheck.activate(
+            new firebase.appCheck.ReCaptchaEnterpriseProvider('6LetbP0tAAAAAO257TpHcTPT_Y99KeSZljQSHGO5'),
+            true // لتجديد التوكن تلقائياً
+        );
+        // --- نهاية كود App Check ---
+
         const db = firebase.firestore();
         db.enablePersistence().catch(() => console.log("Offline mode ready"));
 
-        let currentUserRole = "selector";
+        let currentUserRole = "selector"; // selector | student | parent | driver | admin
         let currentSemester = "الترم الأول";
         let selectedAdminViewSemester = "الترم الأول";
         let currentBusNumber = null;
@@ -1092,31 +952,10 @@
         let qrIntervalTimer = null;
         let html5QrCode = null;
         const todayStr = new Date().toLocaleDateString('en-CA');
-        
-        let currentAdminReportDate = todayStr;
-        let currentDriverReportDate = todayStr;
 
         let isProcessingScan = false; 
         let lastScannedStudentId = "";
         let lastScanTimestamp = 0;
-
-        function updateAdminReportDate() {
-            const selected = document.getElementById('adminReportDate').value;
-            if(selected) {
-                currentAdminReportDate = selected;
-                setupTodayAttendanceCounter();
-                setupBusesListListener();
-            }
-        }
-
-        function updateDriverReportDate() {
-            const selected = document.getElementById('driverReportDate').value;
-            if(selected) {
-                currentDriverReportDate = selected;
-                document.getElementById('logsDateTitle').innerText = currentDriverReportDate;
-                setupDriverAttendanceListener();
-            }
-        }
 
         function switchUserRole(role) {
             currentUserRole = role;
@@ -1125,10 +964,7 @@
             document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
 
             const navContainer = document.getElementById('dynamicNavItems');
-            const sidebarToggleBtn = document.getElementById('mainSidebarToggleBtn');
             navContainer.innerHTML = '';
-
-            sidebarToggleBtn.style.display = 'none';
 
             if (role === 'selector') {
                 document.getElementById('portalSelectorTab').classList.add('active');
@@ -1136,14 +972,31 @@
             } else if (role === 'student') {
                 document.getElementById('studentTab').classList.add('active');
                 document.getElementById('currentPageTitle').innerText = 'كارت الطالب الذكي';
+                navContainer.innerHTML = `
+                    <button class="nav-item active" onclick="navigateTo('studentTab', 'كارت الطالب الذكي')">
+                        <i class="fa-solid fa-id-card"></i> كارت الطالب
+                    </button>
+                `;
             } else if (role === 'parent') {
                 document.getElementById('parentTab').classList.add('active');
                 document.getElementById('currentPageTitle').innerText = 'متابعة ولي الأمر';
+                navContainer.innerHTML = `
+                    <button class="nav-item active" onclick="navigateTo('parentTab', 'متابعة ولي الأمر')">
+                        <i class="fa-solid fa-users-viewfinder"></i> متابعة ولي الأمر
+                    </button>
+                `;
             } else if (role === 'driver') {
                 document.getElementById('scanTab').classList.add('active');
                 document.getElementById('currentPageTitle').innerText = 'ماسح السائق للتحقق';
+                navContainer.innerHTML = `
+                    <button class="nav-item active" onclick="navigateTo('scanTab', 'ماسح السائق للتحقق')">
+                        <i class="fa-solid fa-qrcode"></i> الماسح الضوئي
+                    </button>
+                    <button class="nav-item" onclick="navigateTo('logsTab', 'سجل الحضور اليومي')">
+                        <i class="fa-solid fa-clock-rotate-left"></i> السجل اليومي
+                    </button>
+                `;
             } else if (role === 'admin') {
-                sidebarToggleBtn.style.display = 'flex';
                 document.getElementById('adminTab').classList.add('active');
                 document.getElementById('currentPageTitle').innerText = 'لوحة الإدارة والمالية';
                 navContainer.innerHTML = `
@@ -1154,73 +1007,6 @@
                         <i class="fa-solid fa-magnifying-glass"></i> البحث المستقل للطلاب
                     </button>
                 `;
-            } else if (role === 'unified') {
-                document.getElementById('unifiedTab').classList.add('active');
-                document.getElementById('currentPageTitle').innerText = 'تسجيل الدخول الموحد';
-                toggleUnifiedFields();
-            }
-        }
-
-        function toggleUnifiedFields() {
-            const role = document.getElementById('unifiedRoleSelect').value;
-            const container = document.getElementById('unifiedInputFields');
-            container.innerHTML = '';
-
-            if (role === 'student') {
-                container.innerHTML = `
-                    <input type="text" id="uniStudentId" class="input-box" placeholder="أدخل كود الطالب (مثال: STD-1001)" style="text-align: center; margin-top: 10px;">
-                `;
-            } else if (role === 'parent') {
-                container.innerHTML = `
-                    <input type="tel" id="uniParentPhone" class="input-box" placeholder="رقم هاتف ولي الأمر" style="text-align: center; margin-top: 10px;">
-                    <input type="password" id="uniParentPass" class="input-box" placeholder="كلمة المرور" style="text-align: center; margin-top: 10px;">
-                `;
-            } else if (role === 'driver') {
-                container.innerHTML = `
-                    <input type="text" id="uniBusNum" class="input-box" placeholder="رقم الحافلة / المشرف" style="text-align: center; margin-top: 10px;">
-                    <input type="password" id="uniDriverPass" class="input-box" placeholder="كلمة المرور" style="text-align: center; margin-top: 10px;">
-                `;
-            } else if (role === 'admin') {
-                container.innerHTML = `
-                    <input type="email" id="uniAdminEmail" class="input-box" placeholder="البريد الإلكتروني للإدارة" style="text-align: center; margin-top: 10px;">
-                    <input type="password" id="uniAdminPass" class="input-box" placeholder="كلمة المرور" style="text-align: center; margin-top: 10px;">
-                `;
-            }
-        }
-
-        async function executeUnifiedLogin() {
-            const role = document.getElementById('unifiedRoleSelect').value;
-
-            if (role === 'student') {
-                const id = document.getElementById('uniStudentId').value.trim();
-                if(!id) return showCustomAlert("تنبيه", "أدخل كود الطالب!", "warning");
-                document.getElementById('studentLoginId').value = id;
-                switchUserRole('student');
-                loginStudentPortal();
-            } else if (role === 'parent') {
-                const phone = document.getElementById('uniParentPhone').value.trim();
-                const pass = document.getElementById('uniParentPass').value.trim();
-                if(!phone || !pass) return showCustomAlert("تنبيه", "أدخل الرقم وكلمة المرور!", "warning");
-                document.getElementById('parentPhoneInput').value = phone;
-                document.getElementById('parentPasswordInput').value = pass;
-                switchUserRole('parent');
-                loginOrRegisterParentPortal();
-            } else if (role === 'driver') {
-                const bus = document.getElementById('uniBusNum').value.trim();
-                const pass = document.getElementById('uniDriverPass').value.trim();
-                if(!bus || !pass) return showCustomAlert("تنبيه", "أدخل رقم الحافلة وكلمة المرور!", "warning");
-                document.getElementById('busNumberInputScan').value = bus;
-                document.getElementById('driverPassScan').value = pass;
-                switchUserRole('driver');
-                authenticateDriver();
-            } else if (role === 'admin') {
-                const email = document.getElementById('uniAdminEmail').value.trim();
-                const pass = document.getElementById('uniAdminPass').value.trim();
-                if(!email || !pass) return showCustomAlert("تنبيه", "أدخل بيانات الأدمن!", "warning");
-                document.getElementById('adminEmailInput').value = email;
-                document.getElementById('adminPass').value = pass;
-                switchUserRole('admin');
-                authenticateAdmin();
             }
         }
 
@@ -1362,8 +1148,7 @@
         async function authenticateDriver() {
             const busNum = document.getElementById('busNumberInputScan').value.trim();
             const pass = document.getElementById('driverPassScan').value.trim();
-            const confirmPass = document.getElementById('driverPassConfirmScan') ? document.getElementById('driverPassConfirmScan').value.trim() : '';
-            await checkDriverLogin(busNum, pass, confirmPass);
+            await checkDriverLogin(busNum, pass);
         }
 
         async function authenticateDriverLogs() {
@@ -1372,74 +1157,28 @@
             await checkDriverLogin(busNum, pass);
         }
 
-        async function checkDriverLogin(busNum, inputPass, confirmPass = '') {
+        async function checkDriverLogin(busNum, inputPass) {
             if (!busNum || !inputPass) return showCustomAlert("تنبيه", "أدخل رقم الحافلة وكلمة المرور!", 'warning');
 
+            let correctPass = "driver";
+
             try {
-                const driverRef = db.collection("drivers").doc(busNum);
-                const driverSnap = await driverRef.get();
-
-                if (driverSnap.exists) {
-                    const driverData = driverSnap.data();
-                    if (driverData.password === inputPass) {
-                        currentBusNumber = busNum;
-                        document.getElementById('currentDriverBusTitle').innerText = busNum;
-                        document.getElementById('logsBusNumTitle').innerText = busNum;
-                        document.getElementById('btnBusNumTitle').innerText = busNum;
-
-                        document.getElementById('driverReportDate').value = todayStr;
-                        currentDriverReportDate = todayStr;
-                        document.getElementById('logsDateTitle').innerText = currentDriverReportDate;
-
-                        unlockDriverScreens();
-                        setupDriverAttendanceListener();
-                    } else {
-                        showCustomAlert("خطأ في الدخول", "كلمة المرور الخاصة بهذه الحافلة غير صحيحة!", 'error');
-                    }
-                } else {
-                    let globalDriverPass = "driver";
-                    try {
-                        const globalSnap = await db.collection("settings").doc("driver").get();
-                        if (globalSnap.exists && globalSnap.data().password) {
-                            globalDriverPass = globalSnap.data().password;
-                        }
-                    } catch(e){}
-
-                    if (inputPass === globalDriverPass) {
-                        currentBusNumber = busNum;
-                        document.getElementById('currentDriverBusTitle').innerText = busNum;
-                        document.getElementById('logsBusNumTitle').innerText = busNum;
-                        document.getElementById('btnBusNumTitle').innerText = busNum;
-                        unlockDriverScreens();
-                        setupDriverAttendanceListener();
-                        return;
-                    }
-
-                    if (inputPass.length < 4) {
-                        return showCustomAlert("كلمة مرور ضعيفة", "يجب ألا تقل كلمة المرور عن 4 رموز!", 'warning');
-                    }
-                    if (confirmPass && inputPass !== confirmPass) {
-                        return showCustomAlert("تنبيه", "كلمتا المرور غير متطابقتين!", 'warning');
-                    }
-
-                    await driverRef.set({
-                        busNumber: busNum,
-                        password: inputPass,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-
-                    showCustomAlert("تم تسجيل الحساب", `تم إنشاء حساب المشرف/السائق للحافلة (${busNum}) بكلمة السر الجديدة بنجاح!`, 'success');
-
-                    currentBusNumber = busNum;
-                    document.getElementById('currentDriverBusTitle').innerText = busNum;
-                    document.getElementById('logsBusNumTitle').innerText = busNum;
-                    document.getElementById('btnBusNumTitle').innerText = busNum;
-                    unlockDriverScreens();
-                    setupDriverAttendanceListener();
+                const driverSnap = await db.collection("settings").doc("driver").get();
+                if (driverSnap.exists && driverSnap.data().password) {
+                    correctPass = driverSnap.data().password;
                 }
-            } catch(e) {
-                console.error(e);
-                showCustomAlert("خطأ", "حدث خطأ أثناء الاتصال بالسيرفر!", 'error');
+            } catch(e) {}
+
+            if (inputPass === correctPass) {
+                currentBusNumber = busNum;
+                document.getElementById('currentDriverBusTitle').innerText = busNum;
+                document.getElementById('logsBusNumTitle').innerText = busNum;
+                document.getElementById('btnBusNumTitle').innerText = busNum;
+
+                unlockDriverScreens();
+                setupDriverAttendanceListener();
+            } else {
+                showCustomAlert("خطأ في الدخول", "كلمة مرور السائق غير صحيحة!", 'error');
             }
         }
 
@@ -1463,134 +1202,20 @@
 
             document.getElementById('driverPassScan').value = '';
             document.getElementById('driverPassLogs').value = '';
-            if (document.getElementById('driverPassConfirmScan')) {
-                document.getElementById('driverPassConfirmScan').value = '';
-            }
         }
 
-        function toggleParentForgotPass(showForgot) {
-            document.getElementById('parentAuthCard').style.display = showForgot ? 'none' : 'block';
-            document.getElementById('parentForgotCard').style.display = showForgot ? 'block' : 'none';
-        }
-
-        async function loginOrRegisterParentPortal() {
+        function loginParentPortal() {
             const phone = document.getElementById('parentPhoneInput').value.trim();
-            const email = document.getElementById('parentEmailInput').value.trim();
-            const password = document.getElementById('parentPasswordInput').value.trim();
-            const confirmPass = document.getElementById('parentPasswordConfirmInput').value.trim();
+            if (!phone) return showCustomAlert("تنبيه", "يرجى إدخال رقم هاتف ولي الأمر!", 'warning');
 
-            if (!phone || !password) {
-                return showCustomAlert("تنبيه", "يرجى إدخال رقم الهاتف وكلمة المرور!", 'warning');
-            }
+            currentParentPhone = phone;
+            document.getElementById('parentAuthCard').style.display = 'none';
+            document.getElementById('parentPortalContent').style.display = 'block';
+            document.getElementById('parentPhoneTitle').innerText = `رقم ولي الأمر المتابع: ${phone}`;
 
-            try {
-                const parentRef = db.collection("parents").doc(phone);
-                const parentSnap = await parentRef.get();
-
-                if (parentSnap.exists) {
-                    const parentData = parentSnap.data();
-                    if (parentData.password !== password) {
-                        return showCustomAlert("خطأ في الدخول", "كلمة المرور لولي الأمر غير صحيحة!", 'error');
-                    }
-
-                    if (email && email !== parentData.email) {
-                        await parentRef.set({ email: email }, { merge: true });
-                        sendActivationNoticeModal(email, phone);
-                    }
-
-                } else {
-                    if (password.length < 4) {
-                        return showCustomAlert("كلمة مرور ضعيفة", "يجب ألا تقل كلمة المرور عن 4 رموز!", 'warning');
-                    }
-
-                    if (confirmPass && password !== confirmPass) {
-                        return showCustomAlert("تنبيه", "كلمتا المرور غير متطابقتين!", 'warning');
-                    }
-
-                    await parentRef.set({
-                        phone: phone,
-                        email: email || "",
-                        password: password,
-                        createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-
-                    if (email) {
-                        sendActivationNoticeModal(email, phone);
-                    } else {
-                        showCustomAlert("تم إنشاء الحساب", "تم إنشاء كلمة المرور الخاصة بك وتفعيل الحساب بنجاح!", 'success');
-                    }
-                }
-
-                currentParentPhone = phone;
-                document.getElementById('parentAuthCard').style.display = 'none';
-                document.getElementById('parentPortalContent').style.display = 'block';
-                document.getElementById('parentPhoneTitle').innerText = `رقم المسجل: ${phone}`;
-                document.getElementById('parentEmailTitle').innerText = email ? `البريد الإلكتروني: ${email}` : (parentSnap.exists && parentSnap.data().email ? `البريد الإلكتروني: ${parentSnap.data().email}` : 'البريد الإلكتروني: غير مسجل');
-
-                requestNotificationPermission();
-                setupParentNotificationsListener(phone);
-                loadParentChildrenFinancials(phone);
-
-            } catch(e) {
-                console.error(e);
-                showCustomAlert("خطأ في الاتصال", "حدث خطأ أثناء الاتصال بالسيرفر!", 'error');
-            }
-        }
-
-        function sendActivationNoticeModal(email, phone) {
-            showCustomConfirm(
-                "📧 رسالة تفعيل البريد الإلكتروني",
-                `تم ربط بريدك الإلكتروني (${email}) بنجاح بحساب ولي الأمر رقم (${phone}).\n\nهل ترغب في فتح تطبيق البريد الآن لتأكيد واستلام رسالة التفعيل؟`,
-                () => {
-                    try {
-                        const subject = encodeURIComponent("تفعيل حساب ولي الأمر - منظومة مسار بلس");
-                        const body = encodeURIComponent(`مرحباً بك، تم تفعيل ربط بريدك الإلكتروني بنجاح بحساب ولي الأمر رقم: ${phone}`);
-                        window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
-                    } catch (err) {}
-                }
-            );
-        }
-
-        async function resetParentPassword() {
-            const phone = document.getElementById('resetParentPhone').value.trim();
-            const email = document.getElementById('resetParentEmail').value.trim();
-            const newPass = document.getElementById('resetParentNewPass').value.trim();
-
-            if (!phone || !email || !newPass) {
-                return showCustomAlert("تنبيه", "يرجى ملء جميع البيانات المطلوبة لاستعادة كلمة المرور!", 'warning');
-            }
-
-            if (newPass.length < 4) {
-                return showCustomAlert("تنبيه", "كلمة المرور الجديدة يجب أن تكون 4 رموز على الأقل!", 'warning');
-            }
-
-            try {
-                const parentRef = db.collection("parents").doc(phone);
-                const parentSnap = await parentRef.get();
-
-                if (!parentSnap.exists) {
-                    return showCustomAlert("خطأ", "رقم هاتف ولي الأمر غير مسجل بالنظام!", 'error');
-                }
-
-                const data = parentSnap.data();
-                if (data.email && data.email.toLowerCase() !== email.toLowerCase()) {
-                    return showCustomAlert("خطأ في التحقق", "البريد الإلكتروني المدخل لا يطابق البريد المسجل لهذا الرقم!", 'error');
-                }
-
-                await parentRef.set({
-                    password: newPass,
-                    email: email
-                }, { merge: true });
-
-                showCustomAlert("تم إعادة التعيين", "تم تحديث كلمة المرور الخاصة بك بنجاح! يمكنك الآن تسجيل الدخول بها.", 'success');
-                toggleParentForgotPass(false);
-
-                document.getElementById('parentPhoneInput').value = phone;
-                document.getElementById('parentPasswordInput').value = newPass;
-
-            } catch (e) {
-                showCustomAlert("خطأ", "تعذر استعادة كلمة المرور، تأكد من الاتصال بالسيرفر!", 'error');
-            }
+            requestNotificationPermission();
+            setupParentNotificationsListener(phone);
+            loadParentChildrenFinancials(phone);
         }
 
         function logoutParentPortal() {
@@ -1598,8 +1223,6 @@
             currentParentPhone = null;
             document.getElementById('parentAuthCard').style.display = 'block';
             document.getElementById('parentPortalContent').style.display = 'none';
-            document.getElementById('parentPasswordInput').value = '';
-            document.getElementById('parentPasswordConfirmInput').value = '';
         }
 
         function loadParentChildrenFinancials(phone) {
@@ -1633,7 +1256,7 @@
                     `;
                     container.appendChild(card);
                 });
-            }, (err) => { console.error(err); });
+            });
         }
 
         function setupParentNotificationsListener(phone) {
@@ -1683,7 +1306,7 @@
                         `;
                         list.appendChild(card);
                     });
-                }, (err) => { console.error(err); });
+                });
         }
 
         async function loginStudentPortal() {
@@ -1700,10 +1323,18 @@
                     const data = docSnap.data();
 
                     if (data.boundDeviceId && data.boundDeviceId !== currentDeviceId) {
-                        return showCustomAlert(
-                            "تم رفض الوصول", 
-                            "عذراً! هذا الحساب مقترن برقم جهاز آخر بالفعل.\n\nلا يمكن إعادة ربط الحساب بجهاز جديد إلا من خلال (لوحة الإدارة) حصراً لحماية الحساب من الاستخدام غير المصرح به.", 
-                            'error'
+                        return showCustomConfirm(
+                            "اقتران بجهاز جديد",
+                            "عذراً! هذا الحساب مقترن بهاتف آخر سابقاً (أو تم إعادة تثبيت التطبيق).\nهل تريد طلب إعادة التفعيل والاقتران بهذا الهاتف الحالي؟",
+                            async () => {
+                                try {
+                                    await docRef.set({ boundDeviceId: currentDeviceId }, { merge: true });
+                                    showCustomAlert("تم إعادة التفعيل", "تم تفعيل واقتران الكارت بصفة رسمية على جهازك الحالي بنجاح!", 'success');
+                                    showStudentPortal(inputId, data);
+                                } catch(err) {
+                                    showCustomAlert("خطأ", "تعذر تفعيل الجهاز بالسيرفر!", 'error');
+                                }
+                            }
                         );
                     }
 
@@ -1744,62 +1375,11 @@
             document.getElementById('studentCardName').innerText = data.name;
             document.getElementById('studentCardId').innerText = `ID: ${inputId} (${data.semester || "الترم الأول"})`;
             
-            const total = Number(data.feeTotal) || 0;
-            const paid = Number(data.feePaid) || 0;
-            const discount = Number(data.feeDiscount) || 0;
-            const remaining = Math.max(0, (total - discount) - paid);
-
-            const noticeBanner = document.getElementById('studentDueNoticeBanner');
-            noticeBanner.innerHTML = '';
-
-            let isBlockedDue = false;
-
-            if (remaining > 0 && data.dueDate) {
-                const today = new Date();
-                today.setHours(0,0,0,0);
-                
-                const dueDateObj = new Date(data.dueDate);
-                dueDateObj.setHours(0,0,0,0);
-
-                const diffTime = today.getTime() - dueDateObj.getTime();
-                const diffDays = Math.ceil(diffTime / (1000 * 3600 * 24));
-
-                if (diffDays > 3) {
-                    isBlockedDue = true;
-                    noticeBanner.innerHTML = `
-                        <div class="due-danger-banner">
-                            <i class="fa-solid fa-lock" style="font-size:1.5rem; margin-bottom:5px;"></i><br>
-                            <strong>تم إغلاق كارت الباركود لتجاوز فترة السماح!</strong><br>
-                            تجاوزت تاريخ الاستحقاق (${data.dueDate}) بـ ${diffDays} أيام وبقيمة ${remaining} ج.م.<br>
-                            <span style="color:white; font-weight:bold;">لا يمكن تفعيل الكارت إلا من خلال الإدارة بعد تسديد المستحقات.</span>
-                        </div>
-                    `;
-                } else if (diffDays > 0) {
-                    const remainingGraceDays = 3 - diffDays + 1;
-                    noticeBanner.innerHTML = `
-                        <div class="due-warning-banner">
-                            <i class="fa-solid fa-triangle-exclamation"></i> <strong>تنبيه هامة بضرورة تسديد المستحقات:</strong><br>
-                            تجاوزت تاريخ الاستحقاق المحدد (${data.dueDate}) والمبلغ المتبقي: (${remaining} ج.م).<br>
-                            لديك فترة سماح متبقية: <strong>${remainingGraceDays} أيام فقط</strong> قبل إغلاق الكارت أوتوماتيكياً!
-                        </div>
-                    `;
-                }
-            }
-
             const statusBadge = document.getElementById('studentCardStatus');
-            const qrCanvasContainer = document.getElementById('qrcodeCanvasContainer');
+            statusBadge.innerText = data.status || 'مفعل';
+            statusBadge.style.background = data.status === 'مفعل' ? '#10b981' : '#ef4444';
 
-            if (isBlockedDue || data.status !== 'مفعل') {
-                statusBadge.innerText = isBlockedDue ? 'مغلق لتجاوز المستحقات' : (data.status || 'موقف');
-                statusBadge.style.background = '#ef4444';
-                qrCanvasContainer.style.display = 'none';
-                if (qrIntervalTimer) clearInterval(qrIntervalTimer);
-            } else {
-                statusBadge.innerText = 'مفعل';
-                statusBadge.style.background = '#10b981';
-                qrCanvasContainer.style.display = 'block';
-                startDynamicQRGenerator(inputId);
-            }
+            startDynamicQRGenerator(inputId);
         }
 
         function startDynamicQRGenerator(studentId) {
@@ -1888,30 +1468,7 @@
                     const data = docSnap.data();
                     const studentSem = data.semester || "الترم الأول";
 
-                    const total = Number(data.feeTotal) || 0;
-                    const paid = Number(data.feePaid) || 0;
-                    const discount = Number(data.feeDiscount) || 0;
-                    const remaining = Math.max(0, (total - discount) - paid);
-
-                    let isBlockedDue = false;
-                    if (remaining > 0 && data.dueDate) {
-                        const today = new Date();
-                        today.setHours(0,0,0,0);
-                        const dueDateObj = new Date(data.dueDate);
-                        dueDateObj.setHours(0,0,0,0);
-                        const diffDays = Math.ceil((today.getTime() - dueDateObj.getTime()) / (1000 * 3600 * 24));
-                        if (diffDays > 3) isBlockedDue = true;
-                    }
-
-                    if (isBlockedDue) {
-                        playSound(150, null, 'sawtooth');
-                        resultCard.className = 'result-card danger';
-                        resultIcon.innerHTML = '<i class="fa-solid fa-lock" style="color:var(--danger)"></i>';
-                        resultTitle.innerText = data.name;
-                        resultDetail.innerText = `الكود: ${cleanId} (تجاوز فترة السماح وباقي ${remaining} ج.م)`;
-                        resultBadge.style.background = '#ef4444';
-                        resultBadge.innerText = 'الكارت مغلق لتجاوز المستحقات!';
-                    } else if (studentSem !== currentSemester) {
+                    if (studentSem !== currentSemester) {
                         playSound(150, null, 'sawtooth');
                         resultCard.className = 'result-card danger';
                         resultIcon.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i>';
@@ -2010,7 +1567,7 @@
             if (!currentBusNumber) return;
 
             unsubscribeAttendance = db.collection("attendance")
-                .where("dateString", "==", currentDriverReportDate)
+                .where("dateString", "==", todayStr)
                 .where("semester", "==", currentSemester)
                 .where("busNumber", "==", currentBusNumber)
                 .onSnapshot((snapshot) => {
@@ -2019,7 +1576,7 @@
                     driverAttendanceCache = [];
 
                     if (snapshot.empty) {
-                        logsList.innerHTML = `<p style="text-align: center; color: var(--text-muted);">لا يوجد ركاب صعدوا لحافلة رقم (${currentBusNumber}) بتاريخ ${currentDriverReportDate}</p>`;
+                        logsList.innerHTML = `<p style="text-align: center; color: var(--text-muted);">لا يوجد ركاب صعدوا لحافلة رقم (${currentBusNumber}) اليوم حتى الآن</p>`;
                         return;
                     }
 
@@ -2038,19 +1595,19 @@
                         `;
                         logsList.prepend(item);
                     });
-                }, (err) => { console.error(err); });
+                });
         }
 
         function exportDriverTodayReport() {
             if (driverAttendanceCache.length === 0) {
-                return showCustomAlert("تنبيه", `لا توجد سجلات ركاب لحافلة رقم (${currentBusNumber}) لتصديرها!`, 'warning');
+                return showCustomAlert("تنبيه", `لا توجد سجلات ركاب لحافلة رقم (${currentBusNumber}) اليوم لتصديرها!`, 'warning');
             }
 
-            const headerTitle = "منظومة مسار بلس - تقرير حضور الحافلة";
+            const headerTitle = "منظومة مسار بلس - تقرير حضور الحافلة اليومي";
             const datePrinted = new Date().toLocaleString('ar-EG');
             
             let text = `${headerTitle}\n`;
-            text += `رقم الحافلة:\t${currentBusNumber}\tتاريخ التقرير:\t${currentDriverReportDate}\tوقت الطباعة:\t${datePrinted}\n`;
+            text += `رقم الحافلة:\t${currentBusNumber}\tتاريخ التقرير:\t${todayStr}\tوقت الطباعة:\t${datePrinted}\n`;
             text += `إجمالي الطلاب الركاب:\t${driverAttendanceCache.length} طالب\n\n`;
 
             text += "كود الطالب\tاسم الطالب\tرقم هاتف ولي الأمر\tرقم الحافلة\tاتجاه الرحلة\tوقت الصعود\tالتاريخ\n";
@@ -2059,7 +1616,7 @@
                 text += `${row.studentId}\t${row.studentName}\t${row.parentPhone || "غير مسجل"}\t${row.busNumber}\t${row.tripDirection || ""}\t${row.timeString}\t${row.dateString}\n`;
             });
 
-            document.getElementById('modalTitle').innerText = `تقرير ركاب حافلة رقم (${currentBusNumber}) - ${currentDriverReportDate}`;
+            document.getElementById('modalTitle').innerText = `تقرير ركاب حافلة رقم (${currentBusNumber}) - ${todayStr}`;
             document.getElementById('exportText').value = text;
             document.getElementById('exportModal').style.display = 'flex';
         }
@@ -2078,9 +1635,6 @@
                 document.getElementById('adminAuthCard').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
                 
-                document.getElementById('adminReportDate').value = todayStr;
-                currentAdminReportDate = todayStr;
-
                 loadStudentsList();
                 setupTodayAttendanceCounter();
                 setupBusesListListener();
@@ -2108,9 +1662,6 @@
 
                 document.getElementById('adminAuthCard').style.display = 'none';
                 document.getElementById('adminContent').style.display = 'block';
-
-                document.getElementById('adminReportDate').value = todayStr;
-                currentAdminReportDate = todayStr;
 
                 loadStudentsList();
                 setupTodayAttendanceCounter();
@@ -2188,7 +1739,7 @@
             if (unsubscribeTodayStats) unsubscribeTodayStats();
 
             unsubscribeTodayStats = db.collection("attendance")
-                .where("dateString", "==", currentAdminReportDate)
+                .where("dateString", "==", todayStr)
                 .where("semester", "==", currentSemester)
                 .onSnapshot((snapshot) => {
                     const todayCount = snapshot.size;
@@ -2205,14 +1756,14 @@
             if (unsubscribeBusesStats) unsubscribeBusesStats();
 
             unsubscribeBusesStats = db.collection("attendance")
-                .where("dateString", "==", currentAdminReportDate)
+                .where("dateString", "==", todayStr)
                 .where("semester", "==", currentSemester)
                 .onSnapshot((snapshot) => {
                     const busesContainer = document.getElementById('busesList');
                     busesContainer.innerHTML = '';
 
                     if (snapshot.empty) {
-                        busesContainer.innerHTML = `<p style="text-align: center; color: var(--text-muted);">لا توجد حافلات سجلت حضوراً بتاريخ ${currentAdminReportDate}</p>`;
+                        busesContainer.innerHTML = '<p style="text-align: center; color: var(--text-muted);">لا توجد حافلات سجلت حضوراً اليوم حتى الآن</p>';
                         return;
                     }
 
@@ -2231,7 +1782,7 @@
                         item.innerHTML = `
                             <div class="bus-info">
                                 <h4><i class="fa-solid fa-bus" style="color:var(--warning);"></i> حافلة رقم: <span style="color:white;">${bNum}</span></h4>
-                                <p>إجمالي الركاب: <strong style="color:var(--success);">${count} طالب</strong></p>
+                                <p>إجمالي الركاب اليوم: <strong style="color:var(--success);">${count} طالب</strong></p>
                             </div>
                             <button class="btn-sm btn-excel" onclick="exportSingleBusReport('${bNum}')">
                                 <i class="fa-solid fa-file-excel"></i> تصدير تقرير الحافلة
@@ -2239,24 +1790,24 @@
                         `;
                         busesContainer.appendChild(item);
                     });
-                }, (err) => { console.error(err); });
+                });
         }
 
         async function exportSingleBusReport(busNum) {
             try {
                 const snapshot = await db.collection("attendance")
-                    .where("dateString", "==", currentAdminReportDate)
+                    .where("dateString", "==", todayStr)
                     .where("semester", "==", currentSemester)
                     .where("busNumber", "==", busNum)
                     .get();
 
                 if (snapshot.empty) {
-                    return showCustomAlert("تنبيه", `لا توجد سجلات لحافلة رقم (${busNum}) بتاريخ ${currentAdminReportDate}!`, 'warning');
+                    return showCustomAlert("تنبيه", `لا توجد سجلات لحافلة رقم (${busNum}) اليوم!`, 'warning');
                 }
 
                 const datePrinted = new Date().toLocaleString('ar-EG');
                 let text = `منظومة مسار بلس - تقرير حافلة منفصل\n`;
-                text += `رقم الحافلة:\t${busNum}\tتاريخ التقرير:\t${currentAdminReportDate}\tتاريخ الاستخراج:\t${datePrinted}\n\n`;
+                text += `رقم الحافلة:\t${busNum}\tتاريخ التقرير:\t${todayStr}\tتاريخ الاستخراج:\t${datePrinted}\n\n`;
                 text += "كود الطالب\tاسم الطالب\tرقم هاتف ولي الأمر\tرقم الحافلة\tاتجاه الرحلة\tوقت الصعود\tالتاريخ\n";
 
                 snapshot.forEach(docSnap => {
@@ -2264,7 +1815,7 @@
                     text += `${row.studentId}\t${row.studentName}\t${row.parentPhone || "غير مسجل"}\t${row.busNumber}\t${row.tripDirection || ""}\t${row.timeString}\t${row.dateString}\n`;
                 });
 
-                document.getElementById('modalTitle').innerText = `تقرير حافلة رقم (${busNum}) - تاريخ: ${currentAdminReportDate}`;
+                document.getElementById('modalTitle').innerText = `تقرير حافلة رقم (${busNum}) - تاريخ: ${todayStr}`;
                 document.getElementById('exportText').value = text;
                 document.getElementById('exportModal').style.display = 'flex';
             } catch (e) {
@@ -2380,12 +1931,10 @@
                         <span style="color:var(--text-muted)">الإجمالي: ${fTot} | الخصم: ${fDisc} | </span>
                         <span style="color:var(--warning)">المطلوب: ${fReq} ج.م | </span>
                         <span style="color:var(--success)">مدفوع: ${fPaid} ج.م | </span>
-                        <span style="color:var(--danger)">متبقي: <strong>${fRem} ج.م</strong></span><br>
-                        <span style="color:var(--warning)">تاريخ الاستحقاق: ${data.dueDate || "غير محدد"}</span>
+                        <span style="color:var(--danger)">متبقي: <strong>${fRem} ج.م</strong></span>
                     </div>
 
                     <div class="action-btns-group" style="justify-content: flex-end;">
-                        <button class="btn-sm btn-edit" onclick="openEditStudentModal('${data.id}')"><i class="fa-solid fa-pen-to-square"></i> تعديل</button>
                         <button class="btn-sm btn-pay" onclick="openPaymentModal('${data.id}', '${data.name}', ${fPaid}, ${fRem})"><i class="fa-solid fa-hand-holding-dollar"></i> إضافة تسديد قسط</button>
                         <button class="btn-sm btn-toggle" onclick="toggleStatus('${data.id}', '${data.status || 'مفعل'}')">تغيير الحالة</button>
                         <button class="btn-sm btn-unbind" onclick="unbindDevice('${data.id}')">فك الجهاز</button>
@@ -2394,84 +1943,6 @@
                 `;
                 listContainer.appendChild(item);
             });
-        }
-
-        function openEditStudentModal(studentId) {
-            const student = allStudentsRawData.find(s => s.id === studentId);
-            if (!student) return showCustomAlert("خطأ", "لم يتم العثور على الطالب!", 'error');
-
-            document.getElementById('editOriginalStudentId').value = student.id;
-            document.getElementById('editStudentId').value = student.id;
-            document.getElementById('editStudentName').value = student.name || '';
-            document.getElementById('editParentPhone').value = student.parentPhone || '';
-            document.getElementById('editFeeTotal').value = student.feeTotal || 0;
-            document.getElementById('editFeePaid').value = student.feePaid || 0;
-            document.getElementById('editFeeDiscount').value = student.feeDiscount || 0;
-            document.getElementById('editDueDate').value = student.dueDate || '';
-            document.getElementById('editStudentSemester').value = student.semester || 'الترم الأول';
-
-            document.getElementById('editStudentModal').style.display = 'flex';
-        }
-
-        function closeEditStudentModal() {
-            document.getElementById('editStudentModal').style.display = 'none';
-        }
-
-        async function saveStudentEdits() {
-            const originalId = document.getElementById('editOriginalStudentId').value;
-            const newId = document.getElementById('editStudentId').value.trim();
-            const newName = document.getElementById('editStudentName').value.trim();
-            const newParentPhone = document.getElementById('editParentPhone').value.trim();
-            const newFeeTotal = Number(document.getElementById('editFeeTotal').value) || 0;
-            const newFeePaid = Number(document.getElementById('editFeePaid').value) || 0;
-            const newFeeDiscount = Number(document.getElementById('editFeeDiscount').value) || 0;
-            const newDueDate = document.getElementById('editDueDate').value;
-            const newSemester = document.getElementById('editStudentSemester').value;
-
-            if (!newId || !newName) {
-                return showCustomAlert("تنبيه", "أدخل كود الطالب واسمه بشكل صحيح!", 'warning');
-            }
-
-            try {
-                if (originalId !== newId) {
-                    const existingSnap = await db.collection("students").doc(newId).get();
-                    if (existingSnap.exists) {
-                        return showCustomAlert("خطأ", "الكود الجديد مستخدم بالفعل لطالب آخر!", 'error');
-                    }
-
-                    const originalSnap = await db.collection("students").doc(originalId).get();
-                    const oldData = originalSnap.exists ? originalSnap.data() : {};
-
-                    await db.collection("students").doc(newId).set({
-                        ...oldData,
-                        name: newName,
-                        parentPhone: newParentPhone,
-                        feeTotal: newFeeTotal,
-                        feePaid: newFeePaid,
-                        feeDiscount: newFeeDiscount,
-                        dueDate: newDueDate,
-                        semester: newSemester
-                    });
-
-                    await db.collection("students").doc(originalId).delete();
-                } else {
-                    await db.collection("students").doc(originalId).set({
-                        name: newName,
-                        parentPhone: newParentPhone,
-                        feeTotal: newFeeTotal,
-                        feePaid: newFeePaid,
-                        feeDiscount: newFeeDiscount,
-                        dueDate: newDueDate,
-                        semester: newSemester
-                    }, { merge: true });
-                }
-
-                closeEditStudentModal();
-                showCustomAlert("نجاح التعديل", "تم حفظ وتحديث كافة بيانات الطالب بنجاح!", 'success');
-
-            } catch (e) {
-                showCustomAlert("خطأ", "حدث خطأ أثناء حفظ التعديلات بالسيرفر!", 'error');
-            }
         }
 
         function openPaymentModal(id, name, currentPaid, currentRemaining) {
@@ -2562,7 +2033,6 @@
                     <div class="fin-row"><span>تاريخ الاستحقاق:</span><strong style="color:var(--warning)">${st.dueDate || "غير محدد"}</strong></div>
                     
                     <div style="margin-top:12px; display:flex; gap:6px; flex-wrap:wrap;">
-                        <button class="btn-sm btn-edit" style="flex:1" onclick="openEditStudentModal('${st.id}')"><i class="fa-solid fa-pen-to-square"></i> تعديل</button>
                         <button class="btn-sm btn-pay" style="flex:1; min-width:120px;" onclick="openPaymentModal('${st.id}', '${st.name}', ${paid}, ${rem})"><i class="fa-solid fa-hand-holding-dollar"></i> تسديد قسط</button>
                         <button class="btn-sm btn-toggle" style="flex:1" onclick="toggleStatus('${st.id}', '${st.status || 'مفعل'}')">تغيير الحالة</button>
                         <button class="btn-sm btn-unbind" style="flex:1" onclick="unbindDevice('${st.id}')">فك الجهاز</button>
@@ -2692,15 +2162,15 @@
             document.getElementById('exportModal').style.display = 'flex';
         }
 
-        async function exportAttendanceToExcel(mode = 'specific_date') {
+        async function exportAttendanceToExcel(mode = 'today') {
             let dataToExport = [];
             let title = "";
 
             try {
-                if (mode === 'specific_date') {
-                    const fullSnapshot = await db.collection("attendance").where("dateString", "==", currentAdminReportDate).get();
+                if (mode === 'today') {
+                    const fullSnapshot = await db.collection("attendance").where("dateString", "==", todayStr).get();
                     fullSnapshot.forEach(docSnap => dataToExport.push(docSnap.data()));
-                    title = `تقرير سجل الحضور الكلي لجميع الحافلات (${currentAdminReportDate})`;
+                    title = `تقرير سجل اليوم الكلي لجميع الحافلات (${todayStr})`;
                 } else if (mode === 'semester1') {
                     const fullSnapshot = await db.collection("attendance").where("semester", "==", "الترم الأول").get();
                     fullSnapshot.forEach(docSnap => dataToExport.push(docSnap.data()));
@@ -2721,7 +2191,7 @@
                 let text = `منظومة مسار بلس - ${title}\n`;
                 text += `تاريخ الاستخراج:\t${datePrinted}\tإجمالي العمليات المسجلة:\t${dataToExport.length} عملية صعود\n\n`;
 
-                text += "كود الطالب\tاسم الطالب\tرقم هاتف ولي الأمر\tرقم الحافلة/السائق\tاتجاه الرحلة\tالفصل الدراسي\tوقت الحضور\tالتاريخ\n";
+                text += "كود الطالب\tاسم الطالب\tرقم ولي الأمر\tرقم الحافلة/السائق\tاتجاه الرحلة\tالفصل الدراسي\tوقت الحضور\tالتاريخ\n";
                 dataToExport.forEach(row => {
                     text += `${row.studentId}\t${row.studentName}\t${row.parentPhone || "غير مسجل"}\t${row.busNumber || "غير محدد"}\t${row.tripDirection || ""}\t${row.semester || "الترم الأول"}\t${row.timeString}\t${row.dateString}\n`;
                 });
@@ -2779,78 +2249,14 @@
 
         function shareApp() {
             toggleSidebar();
-            const webUrl = 'https://wasafatbety.github.io/masar-app/';
-            const downloadUrl = 'https://www.appcreator24.com/app4201237-z4ija2';
-            
-            const shareText = 
-`🚌✨ *منظومة مسار بلس | Masar Plus* ✨🚌
-المنظومة الذكية الأولى لإدارة الحافلات وحضور الطلاب وتتبع الأقساط والمالية! 🚀
-
-📌 *مميزات التطبيق:*
-🔹 متابعة لحظية لصعود الأبناء للحافلة وتنبيهات فورية لولي الأمر 📱
-🔹 كارت باركود ذكي ومؤمن لكل طالب 🎫
-🔹 إدارة الحافلات وسجلات الحضور والتقارير بكل سهولة 📊
-🔹 واجهات مخصصة (للطلاب، أولياء الأمور، السائقين، والإدارة) 🛡️
-
-🌐 *تصفح الموقع الرسمي للمنظومة:*
-${webUrl}
-
-📥 *رابط تحميل التطبيق المباشر (APK):*
-${downloadUrl}
-
-💡 شارك التطبيق فقط للمشتركين(الطلاب-أولياء الأمور)ولكل من له صفة بالمؤسسه! ❤️`;
-
             const shareData = {
                 title: 'تطبيق مسار بلس لإدارة الحافلات والتحقق الذكي',
-                text: shareText,
-                url: webUrl
+                text: 'حمل منظومة مسار بلس الذكية لمتابعة اشتراكات الحافلات وتلقي التنبيهات الفورية:',
+                url: window.location.href
             };
-
-            if (navigator.share) {
-                navigator.share(shareData).catch(() => {});
-            } else if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(shareText).then(() => {
-                    showCustomAlert("✨ تم النسخ", "تم نسخ رسالة المشاركة والتحميل بكافة التفاصيل والروابط إلى الحافظة بنجاح!", "success");
-                }).catch(() => {
-                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
-                });
-            } else {
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
-            }
+            if (navigator.share) { navigator.share(shareData).catch(() => {}); }
+            else { window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareData.text + " " + shareData.url)}`, '_blank'); }
         }
-    </script>
-    <script>
-        window.addEventListener('contextmenu', function (e) {
-            e.preventDefault();
-            e.stopPropagation();
-            return false;
-        }, true);
-
-        window.addEventListener('keydown', function (e) {
-            if (e.keyCode === 123) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.keyCode === 85) {
-                e.preventDefault();
-                return false;
-            }
-            if (e.ctrlKey && e.keyCode === 83) {
-                e.preventDefault();
-                return false;
-            }
-        }, true);
-
-        document.addEventListener('selectstart', function(e) {
-            e.preventDefault();
-        });
-        document.addEventListener('dragstart', function(e) {
-            e.preventDefault();
-        });
     </script>
 <!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
 <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
