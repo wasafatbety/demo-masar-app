@@ -18,7 +18,6 @@
     });
   }
 </script>
-
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>مسار بلس | Masar Plus - المنظومة الذكية الموحدة للحافلات</title>
@@ -2853,8 +2852,6 @@ ${downloadUrl}
             e.preventDefault();
         });
     </script>
-
-
 <!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
 <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
   📲 تثبيت تطبيق مسار بلس على الشاشة
@@ -2862,13 +2859,10 @@ ${downloadUrl}
 <script>
   let deferredPrompt;
   const installBtn = document.getElementById('installApp');
-
-
   window.addEventListener('beforeinstallprompt', (e) => {
     e.preventDefault();
     deferredPrompt = e;
     installBtn.style.display = 'block';
-
     installBtn.addEventListener('click', () => {
       installBtn.style.display = 'none';
       deferredPrompt.prompt();
