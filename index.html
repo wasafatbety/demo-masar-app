@@ -804,6 +804,7 @@
                     </div>
                 </div>
 
+                <!-- تم إصلاح وتحديث قسم تغيير كلمة سر الأدمن بنجاح لفك التعارض في IDs -->
                 <div class="collapsible-card">
                     <div class="collapsible-header" onclick="toggleCollapsible(this)">
                         <h3 style="color: var(--warning);"><i class="fa-solid fa-key"></i> تغيير كلمة السر للإدارة والإشراف</h3>
@@ -811,16 +812,16 @@
                     </div>
                     <div class="collapsible-content">
                         <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; margin-bottom: 15px; border: 1px solid var(--card-border);">
-                            <h4 style="color: var(--primary); font-size: 0.95rem; margin-bottom: 10px;"><i class="fa-solid fa-user-lock"></i> تغيير كلمة سر لوحة الإدارة</h4>
+                            <h4 style="color: var(--primary); font-size: 0.95rem; margin-bottom: 10px;"><i class="fa-solid fa-user-lock"></i> تغيير كلمة سر حساب الأدمن (الإدارة)</h4>
                             <div class="form-group">
-                                <label>كلمة السر الحالية للإدارة</label>
+                                <label>كلمة السر الحالية للأدمن</label>
                                 <input type="password" id="oldAdminPassInput" class="input-box" placeholder="أدخل كلمة السر الحالية">
                             </div>
                             <div class="form-group">
-                                <label>كلمة السر الجديدة للإدارة (6 أحرف على الأقل)</label>
-                                <input type="password" id="newAdminPassInput" class="input-box" placeholder="أدخل كلمة السر الجديدة">
+                                <label>كلمة السر الجديدة للأدمن (6 أحرف على الأقل)</label>
+                                <input type="password" id="changeAdminNewPassInput" class="input-box" placeholder="أدخل كلمة السر الجديدة">
                             </div>
-                            <button class="btn-submit" onclick="changeAdminPassword()"><i class="fa-solid fa-arrows-rotate"></i> تحديث كلمة سر الإدارة</button>
+                            <button class="btn-submit" onclick="changeAdminPassword()"><i class="fa-solid fa-arrows-rotate"></i> تحديث كلمة سر الأدمن</button>
                         </div>
 
                         <div style="background: rgba(0,0,0,0.2); padding: 15px; border-radius: 12px; border: 1px solid var(--card-border);">
@@ -1673,7 +1674,7 @@
                 });
 
                 if(!found) {
-                    container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا يوجد أبناء مسجلون متطابقون مع الحساب الحساب الحقيقي.</p>';
+                    container.innerHTML = '<p style="text-align:center; color:var(--text-muted);">لا يوجد أبناء مسجلون متطابقون مع الحساب الحقيقي.</p>';
                 }
             }, (err) => { console.error(err); });
         }
@@ -2106,58 +2107,56 @@
             document.getElementById('exportModal').style.display = 'flex';
         }
 
-async function authenticateAdmin() {
-    const email = document.getElementById('adminEmailInput').value.trim();
-    const pass = document.getElementById('adminPass').value.trim();
+        async function authenticateAdmin() {
+            const email = document.getElementById('adminEmailInput').value.trim();
+            const pass = document.getElementById('adminPass').value.trim();
 
-    if (!email || !pass) {
-        return showCustomAlert("تنبيه", "يرجى إدخال البريد الإلكتروني وكلمة المرور!", 'warning');
-    }
+            if (!email || !pass) {
+                return showCustomAlert("تنبيه", "يرجى إدخال البريد الإلكتروني وكلمة المرور!", 'warning');
+            }
 
-    try {
-        // 1. تسجيل الدخول عبر Auth
-        const userCredential = await firebase.auth().signInWithEmailAndPassword(email, pass);
-        const user = userCredential.user;
+            try {
+                // 1. تسجيل الدخول عبر Auth
+                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, pass);
+                const user = userCredential.user;
 
-        // 2. التحقق المباشر من وجود الحساب داخل مجموعة admins في Firestore
-        const adminDoc = await db.collection("admins").doc(user.uid).get();
+                // 2. التحقق المباشر من وجود الحساب داخل مجموعة admins في Firestore
+                const adminDoc = await db.collection("admins").doc(user.uid).get();
 
-        let isUserAdmin = false;
+                let isUserAdmin = false;
 
-        // التحقق إما عبر مستند admins أو البريد الرئيسي
-        if (adminDoc.exists && adminDoc.data().role === "admin") {
-            isUserAdmin = true;
-        } else if (user.email === "admin@masar.com") {
-            isUserAdmin = true;
-        } else {
-            // التحقق الاحتياطي عبر Custom Claims
-            const idTokenResult = await user.getIdTokenResult(true);
-            if (idTokenResult.claims.admin) isUserAdmin = true;
+                if (adminDoc.exists && adminDoc.data().role === "admin") {
+                    isUserAdmin = true;
+                } else if (user.email === "admin@masar.com") {
+                    isUserAdmin = true;
+                } else {
+                    const idTokenResult = await user.getIdTokenResult(true);
+                    if (idTokenResult.claims.admin) isUserAdmin = true;
+                }
+
+                if (!isUserAdmin) {
+                    await firebase.auth().signOut();
+                    return showCustomAlert("تم رفض الدخول", "هذا الحساب لا يملك صلاحية الأدمن!", 'error');
+                }
+
+                // 3. فتح لوحة التحكم بنجاح
+                document.getElementById('adminAuthCard').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                
+                document.getElementById('adminReportDate').value = todayStr;
+                currentAdminReportDate = todayStr;
+
+                loadStudentsList();
+                setupTodayAttendanceCounter();
+                setupBusesListListener();
+                
+                showCustomAlert("نجاح الدخول", "تم تسجيل الدخول بصلاحيات الإدارة المشفرة بنجاح", "success");
+
+            } catch (err) {
+                console.error(err);
+                showCustomAlert("خطأ في الدخول", "البريد الإلكتروني أو كلمة المرور غير صحيحة!", 'error');
+            }
         }
-
-        if (!isUserAdmin) {
-            await firebase.auth().signOut();
-            return showCustomAlert("تم رفض الدخول", "هذا الحساب لا يملك صلاحية الأدمن!", 'error');
-        }
-
-        // 3. فتح لوحة التحكم بنجاح
-        document.getElementById('adminAuthCard').style.display = 'none';
-        document.getElementById('adminContent').style.display = 'block';
-        
-        document.getElementById('adminReportDate').value = todayStr;
-        currentAdminReportDate = todayStr;
-
-        loadStudentsList();
-        setupTodayAttendanceCounter();
-        setupBusesListListener();
-        
-        showCustomAlert("نجاح الدخول", "تم تسجيل الدخول بصلاحيات الإدارة المشفرة بنجاح", "success");
-
-    } catch (err) {
-        console.error(err);
-        showCustomAlert("خطأ في الدخول", "البريد الإلكتروني أو كلمة المرور غير صحيحة!", 'error');
-    }
-}
 
         async function createNewAdminFromPanel() {
             const email = document.getElementById('newAdminEmailInput').value.trim();
@@ -2184,12 +2183,17 @@ async function authenticateAdmin() {
             }
         }
 
+        // دالة تغيير كلمة سر الأدمن المُعدلة كلياً بعد حسم التعارض
         async function changeAdminPassword() {
             const oldPass = document.getElementById('oldAdminPassInput').value.trim();
-            const newPass = document.getElementById('newAdminPassInput').value.trim();
+            const newPass = document.getElementById('changeAdminNewPassInput').value.trim();
 
             if (!oldPass || !newPass) {
-                return showCustomAlert("تنبيه", "يرجى إدخال كلمة السر الحالية والجديدة للإدارة!", 'warning');
+                return showCustomAlert("تنبيه", "يرجى إدخال كلمة السر الحالية والجديدة للأدمن!", 'warning');
+            }
+
+            if (newPass.length < 6) {
+                return showCustomAlert("كلمة مرور ضعيفة", "يجب ألا تقل كلمة السر الجديدة عن 6 أحرف أو أرقام!", 'warning');
             }
 
             const user = firebase.auth().currentUser;
@@ -2204,11 +2208,12 @@ async function authenticateAdmin() {
                 await user.updatePassword(newPass);
 
                 document.getElementById('oldAdminPassInput').value = '';
-                document.getElementById('newAdminPassInput').value = '';
+                document.getElementById('changeAdminNewPassInput').value = '';
 
-                showCustomAlert("نجاح التغيير", "تم تحديث كلمة سر لوحة الإدارة بنجاح!", 'success');
+                showCustomAlert("نجاح التغيير", "تم تحديث كلمة سر الأدمن بنجاح!", 'success');
             } catch (e) {
-                showCustomAlert("خطأ", "كلمة السر الحالية غير صحيحة أو أن الجديدة ضعيفة (يجب أن تكون 6 أحرف على الأقل)!", 'error');
+                console.error(e);
+                showCustomAlert("خطأ", "كلمة السر الحالية غير صحيحة أو أن الجديدة ضعيفة!", 'error');
             }
         }
 
@@ -2585,7 +2590,7 @@ async function authenticateAdmin() {
             }
 
             let matches = allStudentsRawData.filter(s => 
-                s.name.toLowerCase().includes(term) || s.id.toLowerCase().includes(term)
+                (s.name && s.name.toLowerCase().includes(term)) || (s.id && s.id.toLowerCase().includes(term))
             );
 
             if (semFilter !== 'الكل') {
@@ -2884,6 +2889,8 @@ ${downloadUrl}
             }
         }
     </script>
+    
+    <!-- حماية الكود ومنع فتح أدوات التطوير DevTools -->
     <script>
         window.addEventListener('contextmenu', function (e) {
             e.preventDefault();
@@ -2910,72 +2917,28 @@ ${downloadUrl}
             }
         }, true);
 
-        document.addEventListener('selectstart', function(e) {
-            e.preventDefault();
-        });
-        document.addEventListener('dragstart', function(e) {
-            e.preventDefault();
-        });
-    </script>
-<!-- ضع هذا السكربت في نهاية ملف HTML قبل إغلاق علامة </body> -->
-<script>
-    // 1. تعطيل الزر الأيمن للماوس (Right Click)
-    document.addEventListener('contextmenu', function (e) {
-        e.preventDefault();
-        e.stopPropagation();
-        return false;
-    }, true);
+        document.addEventListener('selectstart', function(e) { e.preventDefault(); });
+        document.addEventListener('dragstart', function(e) { e.preventDefault(); });
 
-    // 2. تعطيل اختصارات لوحة المفاتيح الخاصة بأدوات التطوير (F12, Ctrl+Shift+I, Ctrl+Shift+J, Ctrl+Shift+C, Ctrl+U, Ctrl+S)
-    window.addEventListener('keydown', function (e) {
-        // F12
-        if (e.keyCode === 123) {
-            e.preventDefault();
-            return false;
-        }
-        // Ctrl + Shift + I / J / C
-        if (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) {
-            e.preventDefault();
-            return false;
-        }
-        // Ctrl + U (عرض سورس الكود)
-        if (e.ctrlKey && e.keyCode === 85) {
-            e.preventDefault();
-            return false;
-        }
-        // Ctrl + S (حفظ الصفحة)
-        if (e.ctrlKey && e.keyCode === 83) {
-            e.preventDefault();
-            return false;
-        }
-    }, true);
-
-    // 3. تعطيل التحديد والسحب للنصوص والمدخلات
-    document.addEventListener('selectstart', function(e) { e.preventDefault(); });
-    document.addEventListener('dragstart', function(e) { e.preventDefault(); });
-
-    // 4. تقنية حظر الكونسول عبر Debugger Loop (توقف الصفحة تماماً إذا فتح المخترق DevTools)
-    (function () {
-        function blockDevTools() {
-            const startTime = performance.now();
-            // أمر debugger يوقف التنفيذ فوراً إذا كانت أدوات التطوير مفتوحة
-            debugger;
-            const endTime = performance.now();
-            
-            // إذا كان الفرق الزمني كبيراً فهذا يعني أن المتصفح توقف عند الـ debugger (DevTools مفتوحة)
-            if (endTime - startTime > 100) {
-                document.body.innerHTML = `
-                    <div style="background:#0f172a; color:#ef4444; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; text-align:center; padding:20px;">
-                        <h1 style="font-size:2rem; margin-bottom:10px;">⚠️ تنبيه أمني</h1>
-                        <p style="font-size:1.1rem; color:#94a3b8;">تم كشف محاولة فتح أدوات التطوير (DevTools). تم إغلاق الجلسة لحماية المنظومة.</p>
-                        <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#4f46e5; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">إعادة تحميل الصفحة</button>
-                    </div>
-                `;
+        (function () {
+            function blockDevTools() {
+                const startTime = performance.now();
+                debugger;
+                const endTime = performance.now();
+                
+                if (endTime - startTime > 100) {
+                    document.body.innerHTML = `
+                        <div style="background:#0f172a; color:#ef4444; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; text-align:center; padding:20px;">
+                            <h1 style="font-size:2rem; margin-bottom:10px;">⚠️ تنبيه أمني</h1>
+                            <p style="font-size:1.1rem; color:#94a3b8;">تم كشف محاولة فتح أدوات التطوير (DevTools). تم إغلاق الجلسة لحماية المنظومة.</p>
+                            <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#4f46e5; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">إعادة تحميل الصفحة</button>
+                        </div>
+                    `;
+                }
             }
-        }
-        setInterval(blockDevTools, 1000);
-    })();
-</script>
+            setInterval(blockDevTools, 1000);
+        })();
+    </script>
 <!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
 <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
   📲 تثبيت تطبيق مسار بلس على الشاشة
