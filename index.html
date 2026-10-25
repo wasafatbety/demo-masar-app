@@ -18,6 +18,7 @@
     });
   }
 </script>
+
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>مسار بلس | Masar Plus - المنظومة الذكية الموحدة للحافلات</title>
@@ -2157,33 +2158,59 @@
                 showCustomAlert("خطأ في الدخول", "البريد الإلكتروني أو كلمة المرور غير صحيحة!", 'error');
             }
         }
+async function createNewAdminFromPanel() {
+    const email = document.getElementById('newAdminEmailInput').value.trim();
+    const pass = document.getElementById('newAdminPassInput').value.trim();
 
-        async function createNewAdminFromPanel() {
-            const email = document.getElementById('newAdminEmailInput').value.trim();
-            const pass = document.getElementById('newAdminPassInput').value.trim();
+    if (!email || !pass) {
+        return showCustomAlert("تنبيه", "يرجى كتابة البريد الإلكتروني وكلمة المرور!", 'warning');
+    }
 
-            if (!email || !pass) {
-                return showCustomAlert("تنبيه", "يرجى كتابة البريد الإلكتروني وكلمة المرور!", 'warning');
-            }
+    if (pass.length < 6) {
+        return showCustomAlert("كلمة مرور ضعيفة", "يجب أن تكون كلمة المرور 6 أحرف أو أرقام على الأقل!", 'warning');
+    }
 
-            if (pass.length < 6) {
-                return showCustomAlert("كلمة مرور ضعيفة", "يجب أن تكون كلمة المرور 6 أحرف أو أرقام على الأقل!", 'warning');
-            }
-
-            try {
-                const addAdminRole = functions.httpsCallable('addAdminRole');
-                const result = await addAdminRole({ email: email, pass: pass });
-
-                document.getElementById('newAdminEmailInput').value = '';
-                document.getElementById('newAdminPassInput').value = '';
-
-                showCustomAlert("تم إنشاء وتأمين الأدمن", result.data.message, "success");
-            } catch (err) {
-                showCustomAlert("خطأ في الإنشاء", err.message || "حدث خطأ أثناء إضافة حساب الأدمن!", 'error');
-            }
+    try {
+        // 1. إنشاء تطبيق فرعي مؤقت لإنشاء حساب Auth دون تسجيل خروج الأدمن الحالي
+        let secondaryApp;
+        if (!firebase.apps.some(app => app.name === "SecondaryApp")) {
+            secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryApp");
+        } else {
+            secondaryApp = firebase.app("SecondaryApp");
         }
 
-        // دالة تغيير كلمة سر الأدمن المُعدلة كلياً بعد حسم التعارض
+        // 2. إنشاء المستخدم في Firebase Auth عبر التطبيق الفرعي
+        const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
+        const newAdminUser = userCredential.user;
+
+        // 3. كتابة مستند الأدمن بواسطة الأدمن الحالي (db الرئيسي) لأنه يملك صلاحية isAdmin()
+        await db.collection("admins").doc(newAdminUser.uid).set({
+            email: email,
+            role: "admin",
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+        });
+
+        // 4. تسجيل خروج التطبيق الفرعي فوراً
+        await secondaryApp.auth().signOut();
+
+        document.getElementById('newAdminEmailInput').value = '';
+        document.getElementById('newAdminPassInput').value = '';
+
+        showCustomAlert("تم إضافة الأدمن بنجاح", `تم إنشاء وتأمين حساب الأدمن الجديد (${email}) بنجاح!`, "success");
+
+    } catch (err) {
+        console.error(err);
+        let errorMsg = "حدث خطأ أثناء إضافة حساب الأدمن!";
+        if (err.code === 'auth/email-already-in-use') {
+            errorMsg = "هذا البريد الإلكتروني مُسجل بالفعل بحساب آخر!";
+        } else if (err.code === 'auth/invalid-email') {
+            errorMsg = "صيغة البريد الإلكتروني غير صحيحة!";
+        } else if (err.code === 'permission-denied') {
+            errorMsg = "تم رفض العملية! تأكد من أن حسابك الحالي يملك صلاحية الأدمن.";
+        }
+        showCustomAlert("خطأ في الإنشاء", errorMsg, 'error');
+    }
+}        // دالة تغيير كلمة سر الأدمن المُعدلة كلياً بعد حسم التعارض
         async function changeAdminPassword() {
             const oldPass = document.getElementById('oldAdminPassInput').value.trim();
             const newPass = document.getElementById('changeAdminNewPassInput').value.trim();
@@ -2962,5 +2989,7 @@ ${downloadUrl}
     });
   });
 </script>
+</body>
+</html>
 </body>
 </html>
