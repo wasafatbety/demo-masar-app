@@ -48,7 +48,7 @@
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>مسار بلس | Masar Plus - المنظومة الذكية الموحدة للحافلات</title>
+    <title> Masar Bus System  - المنظومة الذكية الموحدة للحافلات</title>
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Google Fonts -->
@@ -420,7 +420,7 @@
                     </defs>
                 </svg>
                 <div class="brand-text">
-                    <h1>مسار | Masar Bus</h1>
+                    <h1> Masar Bus System</h1>
                     <p id="currentPageTitle">اختيار الواجهة</p>
                 </div>
             </div>
@@ -468,7 +468,7 @@
         </div>
 
         <div class="sidebar-footer">
-            منظومة مسار بلس الذكية v3.9<br>
+            منظومة  Masar Bus System الذكية v3.9<br>
             جميع الحقوق محفوظة © 2026
         </div>
     </aside>
@@ -479,7 +479,7 @@
         <div id="portalSelectorTab" class="view active">
             <div class="glass-card" style="text-align: center;">
                 <i class="fa-solid fa-graduation-cap" style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"></i>
-                <h2 style="font-size: 1.3rem; margin-bottom: 5px;">مرحباً بك في منظومة مسار بلس</h2>
+                <h2 style="font-size: 1.3rem; margin-bottom: 5px;">مرحباً بك في منظومة  Masar Bus System</h2>
                 <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 20px;">يرجى تحديد الصفة للدخول للواجهة المخصصة لك:</p>
 
                 <div class="portal-grid">
@@ -982,7 +982,7 @@
     <div id="studentActivationModal" class="modal-overlay">
         <div class="modal-body" style="text-align: center;">
             <i class="fa-solid fa-mobile-screen-button" style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"></i>
-            <h3 style="color: white; font-size: 1.2rem; margin-bottom: 10px;">مرحباً بك في منظومة مسار بلس</h3>
+            <h3 style="color: white; font-size: 1.2rem; margin-bottom: 10px;">مرحباً بك في منظومة  Masar Bus System</h3>
             <p style="color: var(--text-muted); font-size: 0.85rem; line-height: 1.6; margin-bottom: 15px;">
                 أهلاً بك <strong id="activationStudentName" style="color: var(--warning);">الطالب</strong>، لتأكيد التفعيل وحماية حسابك سيتم ربط كارت الباركود بهذا الهاتف تحديداً، ولن يُسمح باستخدامه من جهاز آخر.
             </p>
@@ -1069,7 +1069,7 @@
     <!-- Export Modal Box -->
     <div id="exportModal" class="modal-overlay">
         <div class="modal-body">
-            <h3 id="modalTitle" style="color: white; font-size: 1.1rem;">تقرير الحضور والمالية - مسار بلس</h3>
+            <h3 id="modalTitle" style="color: white; font-size: 1.1rem;">تقرير الحضور والمالية -  Masar Bus System</h3>
             <p style="color: var(--text-muted); font-size: 0.8rem; margin-top: 5px;">تم تنسيق النص أدناه بتنسيق جداول TSV القياسي. اضغط على الزر أدناه وانسخه مباشرة إلى Excel أو Word:</p>
             <textarea id="exportText" readonly wrap="off"></textarea>
             <button class="btn-submit" onclick="copyExportText()"><i class="fa-solid fa-copy"></i> نسخ التقرير للنسخ في Excel / Word</button>
@@ -1603,7 +1603,7 @@
                 `تم ربط بريدك الإلكتروني (${email}) بنجاح بحساب ولي الأمر رقم (${phone}).\n\nهل ترغب في فتح تطبيق البريد الآن لتأكيد واستلام رسالة التفعيل؟`,
                 () => {
                     try {
-                        const subject = encodeURIComponent("تفعيل حساب ولي الأمر - منظومة مسار بلس");
+                        const subject = encodeURIComponent("تفعيل حساب ولي الأمر - منظومة  Masar Bus System");
                         const body = encodeURIComponent(`مرحباً بك، تم تفعيل ربط بريدك الإلكتروني بنجاح بحساب ولي الأمر رقم: ${phone}`);
                         window.location.href = `mailto:${email}?subject=${subject}&body=${body}`;
                     } catch (err) {}
@@ -2117,7 +2117,7 @@
                 return showCustomAlert("تنبيه", `لا توجد سجلات ركاب لحافلة رقم (${currentBusNumber}) لتصديرها!`, 'warning');
             }
 
-            const headerTitle = "منظومة مسار بلس - تقرير حضور الحافلة";
+            const headerTitle = "منظومة  Masar Bus System - تقرير حضور الحافلة";
             const datePrinted = new Date().toLocaleString('ar-EG');
             
             let text = `${headerTitle}\n`;
@@ -2372,7 +2372,7 @@ async function createNewAdminFromPanel() {
                 }
 
                 const datePrinted = new Date().toLocaleString('ar-EG');
-                let text = `منظومة مسار بلس - تقرير حافلة منفصل\n`;
+                let text = `منظومة  Masar Bus System - تقرير حافلة منفصل\n`;
                 text += `رقم الحافلة:\t${busNum}\tتاريخ التقرير:\t${currentAdminReportDate}\tتاريخ الاستخراج:\t${datePrinted}\n\n`;
                 text += "كود الطالب\tاسم الطالب\tرقم هاتف ولي الأمر\tرقم الحافلة\tاتجاه الرحلة\tوقت الصعود\tالتاريخ\n";
 
@@ -2791,7 +2791,7 @@ async function createNewAdminFromPanel() {
 
             const datePrinted = new Date().toLocaleString('ar-EG');
             
-            let text = `منظومة مسار بلس الذكية - التقرير المالي الرسمي\n`;
+            let text = `منظومة  Masar Bus System الذكية - التقرير المالي الرسمي\n`;
             text += `الفصل الدراسي:\t${targetSemester}\tتاريخ الاستخراج:\t${datePrinted}\tعدد الطلاب:\t${dataToProcess.length} طالب\n\n`;
             
             text += `=== ملخص التقرير المالي ===\n`;
@@ -2811,7 +2811,7 @@ async function createNewAdminFromPanel() {
                 text += `${st.id}\t${st.name}\t${st.parentEmail || "غير مسجل"}\t${st.parentPhone || "غير مسجل"}\t${st.semester || "الترم الأول"}\t${st.status || "مفعل"}\t${tot}\t${disc}\t${req}\t${paid}\t${rem}\t${st.dueDate || "غير محدد"}\n`;
             });
 
-            document.getElementById('modalTitle').innerText = `التقرير المالي المفصول ومديونيات الطلاب (${targetSemester}) - مسار بلس`;
+            document.getElementById('modalTitle').innerText = `التقرير المالي المفصول ومديونيات الطلاب (${targetSemester}) -  Masar Bus System`;
             document.getElementById('exportText').value = text;
             document.getElementById('exportModal').style.display = 'flex';
         }
@@ -2842,7 +2842,7 @@ async function createNewAdminFromPanel() {
                 if (dataToExport.length === 0) return showCustomAlert("تنبيه", "لا توجد سجلات حضور!", 'warning');
 
                 const datePrinted = new Date().toLocaleString('ar-EG');
-                let text = `منظومة مسار بلس - ${title}\n`;
+                let text = `منظومة  Masar Bus System - ${title}\n`;
                 text += `تاريخ الاستخراج:\t${datePrinted}\tإجمالي العمليات المسجلة:\t${dataToExport.length} عملية صعود\n\n`;
 
                 text += "كود الطالب\tاسم الطالب\tرقم هاتف ولي الأمر\tرقم الحافلة/السائق\tاتجاه الرحلة\tالفصل الدراسي\tوقت الحضور\tالتاريخ\n";
@@ -2850,7 +2850,7 @@ async function createNewAdminFromPanel() {
                     text += `${row.studentId}\t${row.studentName}\t${row.parentPhone || "غير مسجل"}\t${row.busNumber || "غير محدد"}\t${row.tripDirection || ""}\t${row.semester || "الترم الأول"}\t${row.timeString}\t${row.dateString}\n`;
                 });
 
-                document.getElementById('modalTitle').innerText = `${title} - مسار بلس`;
+                document.getElementById('modalTitle').innerText = `${title} -  Masar Bus System`;
                 document.getElementById('exportText').value = text;
                 document.getElementById('exportModal').style.display = 'flex';
             } catch (e) { showCustomAlert("خطأ", "خطأ أثناء إعداد التقرير!", 'error'); }
@@ -2887,7 +2887,7 @@ async function createNewAdminFromPanel() {
             const content = document.getElementById('infoModalContent');
 
             if (type === 'about') {
-                title.innerText = "نبذة عن منظومة مسار بلس الذكية";
+                title.innerText = "نبذة عن منظومة  Masar Bus System الذكية";
                 content.innerHTML = `<p>منظومة متكاملة لإدارة الحافلات وحصر الحضور تلقائياً وإرسال إشعارات فورية لأولياء الأمور ومتابعة الأمور المالية بمرونة.</p>`;
             } else if (type === 'terms') {
                 title.innerText = "شروط الاستخدام";
@@ -2907,7 +2907,7 @@ async function createNewAdminFromPanel() {
             const downloadUrl = 'https://www.appcreator24.com/app4201237-z4ija2';
             
             const shareText = 
-`🚌✨ *منظومة مسار بلس | Masar Plus* ✨🚌
+`🚌✨ *منظومة  Masar Bus System * ✨🚌
 المنظومة الذكية الأولى لإدارة الحافلات وحضور الطلاب وتتبع الأقساط والمالية! 🚀
 
 📌 *مميزات التطبيق:*
@@ -2925,7 +2925,7 @@ ${downloadUrl}
 💡 شارك التطبيق فقط للمشتركين(الطلاب-أولياء الأمور)ولكل من له صفة بالمؤسسه! ❤️`;
 
             const shareData = {
-                title: 'تطبيق مسار بلس لإدارة الحافلات والتحقق الذكي',
+                title: 'تطبيق  Masar Bus System لإدارة الحافلات والتحقق الذكي',
                 text: shareText,
                 url: webUrl
             };
@@ -2995,7 +2995,7 @@ ${downloadUrl}
     </script>
 <!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
 <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
-  📲 تثبيت تطبيق مسار بلس على الشاشة
+  📲 تثبيت تطبيق  Masar Bus System على الشاشة
 </button>
 <script>
   let deferredPrompt;
