@@ -2901,48 +2901,49 @@ async function createNewAdminFromPanel() {
 
         function closeInfoModal() { document.getElementById('infoModal').style.display = 'none'; }
 
-        function shareApp() {
-            toggleSidebar();
-            const webUrl = 'https://wasafatbety.github.io/masar-app/';
-            const downloadUrl = 'https://www.appcreator24.com/app4201237-z4ija2';
-            
-            const shareText = 
-`🚌✨ *منظومة  Masar Bus System * ✨🚌
-المنظومة الذكية الأولى لإدارة الحافلات وحضور الطلاب وتتبع الأقساط والمالية! 🚀
+       function shareApp() {
+    toggleSidebar();
+    
+    // روابط النسخة التجريبية (Demo)
+    const webUrl = 'https://wasafatbety.github.io/demo-masar-app';
+    const downloadUrl = 'https://www.appcreator24.com/app4229526-mseogk';
+    
+    const shareText = 
+`🚌✨ *Masar Bus System (النسخة التجريبية - Demo)* ✨🚌
+المنظومة الذكية الأولى لإدارة الحافلات وحضور الطلاب وتتبع الأقساط والماليات! 🚀
 
 📌 *مميزات التطبيق:*
 🔹 متابعة لحظية لصعود الأبناء للحافلة وتنبيهات فورية لولي الأمر 📱
 🔹 كارت باركود ذكي ومؤمن لكل طالب 🎫
 🔹 إدارة الحافلات وسجلات الحضور والتقارير بكل سهولة 📊
-🔹 واجهات مخصصة (للطلاب، أولياء الأمور، السائقين، والإدارة) 🛡️
+🔹 واجهات تجريبية مخصصة (للطلاب، أولياء الأمور، السائقين، والإدارة) 🛡️
 
-🌐 *تصفح الموقع الرسمي للمنظومة:*
+🌐 *تصفح النسخة التجريبية المباشرة:*
 ${webUrl}
 
-📥 *رابط تحميل التطبيق المباشر (APK):*
+📥 *رابط تحميل التطبيق التجريبي المباشر (APK):*
 ${downloadUrl}
 
-💡 شارك التطبيق فقط للمشتركين(الطلاب-أولياء الأمور)ولكل من له صفة بالمؤسسه! ❤️`;
+💡 شارك التطبيق للتجربة والمعاينة قبل الاعتماد المالي والأكاديمي! ❤️`;
 
-            const shareData = {
-                title: 'تطبيق  Masar Bus System لإدارة الحافلات والتحقق الذكي',
-                text: shareText,
-                url: webUrl
-            };
+    const shareData = {
+        title: 'تطبيق Masar Bus System - النسخة التجريبية',
+        text: shareText,
+        url: webUrl
+    };
 
-            if (navigator.share) {
-                navigator.share(shareData).catch(() => {});
-            } else if (navigator.clipboard && window.isSecureContext) {
-                navigator.clipboard.writeText(shareText).then(() => {
-                    showCustomAlert("✨ تم النسخ", "تم نسخ رسالة المشاركة والتحميل بكافة التفاصيل والروابط إلى الحافظة بنجاح!", "success");
-                }).catch(() => {
-                    window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
-                });
-            } else {
-                window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
-            }
-        }
-    </script>
+    if (navigator.share) {
+        navigator.share(shareData).catch(() => {});
+    } else if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(shareText).then(() => {
+            showCustomAlert("✨ تم النسخ", "تم نسخ رسالة المشاركة والروابط إلى الحافظة بنجاح!", "success");
+        }).catch(() => {
+            window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+        });
+    } else {
+        window.open(`https://api.whatsapp.com/send?text=${encodeURIComponent(shareText)}`, '_blank');
+    }
+}    </script>
     
     <!-- حماية الكود ومنع فتح أدوات التطوير DevTools -->
     <script>
