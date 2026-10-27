@@ -537,7 +537,7 @@
             <div id="studentAuthCard" class="glass-card" style="text-align: center;">
                 <i class="fa-solid fa-mobile-screen-button" style="font-size: 3rem; color: var(--primary); margin-bottom: 10px;"></i>
                 <h3 style="margin-bottom: 15px;">دخول الطالب</h3>
-                <input type="text" id="studentLoginId" class="input-box" placeholder="أدخل كود الطالب (مثال: STD-1001)" style="text-align: center; margin-bottom: 15px;">
+                <input type="text" id="studentLoginId" class="input-box" placeholder="أدخل كود الطالب (مثال: 1234)" style="text-align: center; margin-bottom: 15px;">
                 <button class="btn-submit" onclick="loginStudentPortal()">عرض كارت الباركود الذكي</button>
                 <button class="btn-submit" style="background: rgba(255,255,255,0.08); margin-top: 10px;" onclick="switchUserRole('selector')">العودة للشاشة الرئيسية</button>
             </div>
@@ -699,7 +699,7 @@
                 <div class="glass-card">
                     <div class="form-group">
                         <label><i class="fa-solid fa-barcode"></i> أدخل كود الطالب يدويًا</label>
-                        <input type="text" id="manualStudentId" class="input-box" placeholder="مثال: STD-1001">
+                        <input type="text" id="manualStudentId" class="input-box" placeholder="مثال: 1234">
                     </div>
                     <button class="btn-submit" onclick="verifyStudentManual()"><i class="fa-solid fa-magnifying-glass"></i> تحقق وسجّل الحضور للحافلة</button>
                 </div>
@@ -885,7 +885,7 @@
                         <i class="fa-solid fa-chevron-down collapsible-icon"></i>
                     </div>
                     <div class="collapsible-content">
-                        <div class="form-group"><label>كود الطالب (ID)</label><input type="text" id="newStudentId" class="input-box" placeholder="STD-1002"></div>
+                        <div class="form-group"><label>كود الطالب (ID)</label><input type="text" id="newStudentId" class="input-box" placeholder="1234"></div>
                         <div class="form-group"><label>اسم الطالب الثلاثي</label><input type="text" id="newStudentName" class="input-box" placeholder="محمد أحمد"></div>
                         <div class="form-group"><label>بريد ولي الأمر (للتأمين والحسابات)</label><input type="email" id="newParentEmail" class="input-box" placeholder="parent@example.com"></div>
                         <div class="form-group"><label>رقم هاتف ولي الأمر (للتنبيه الآلي)</label><input type="tel" id="newParentPhone" class="input-box" placeholder="مثال: 01012345678"></div>
@@ -1220,7 +1220,7 @@
 
             if (role === 'student') {
                 container.innerHTML = `
-                    <input type="text" id="uniStudentId" class="input-box" placeholder="أدخل كود الطالب (مثال: STD-1001)" style="text-align: center; margin-top: 10px;">
+                    <input type="text" id="uniStudentId" class="input-box" placeholder="أدخل كود الطالب (مثال: 1234)" style="text-align: center; margin-top: 10px;">
                 `;
             } else if (role === 'parent') {
                 container.innerHTML = `
