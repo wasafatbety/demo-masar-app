@@ -2584,45 +2584,136 @@
             });
         }
 
-        async function addNewStudent() {
-            const id = document.getElementById('newStudentId').value.trim();
-            const name = document.getElementById('newStudentName').value.trim();
-            const parentEmail = document.getElementById('newParentEmail').value.trim();
-            const parentPhone = document.getElementById('newParentPhone').value.trim();
-            const feeTotal = Number(document.getElementById('newFeeTotal').value) || 0;
-            const feePaid = Number(document.getElementById('newFeePaid').value) || 0;
-            const feeDiscount = Number(document.getElementById('newFeeDiscount').value) || 0;
-            const dueDate = document.getElementById('newDueDate').value;
-            const status = document.getElementById('newStudentStatus').value;
-            
-            if (!id || !name) return showCustomAlert("تنبيه", "أكمل البيانات المطلوبة (الكود والاسم)!", 'warning');
+       async function verifyStudent(studentId) {
+    if (!studentId || !studentId.trim()) return;
 
-            try {
-                await db.collection("students").doc(id).set({
-                    name: name,
-                    parentEmail: parentEmail,
-                    parentPhone: parentPhone,
-                    feeTotal: feeTotal,
-                    feePaid: feePaid,
-                    feeDiscount: feeDiscount,
-                    dueDate: dueDate,
-                    status: status,
-                    semester: currentSemester,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp()
-                }, { merge: true });
+    if (isProcessingScan) return;
 
-                showCustomAlert("نجاح الحفظ", `تم حفظ الطالب والملف المالي (${name}) بنجاح للـ (${currentSemester})!`, 'success');
-                document.getElementById('newStudentId').value = '';
-                document.getElementById('newStudentName').value = '';
-                document.getElementById('newParentEmail').value = '';
-                document.getElementById('newParentPhone').value = '';
-                document.getElementById('newFeeTotal').value = '';
-                document.getElementById('newFeePaid').value = '';
-                document.getElementById('newFeeDiscount').value = '0';
-            } catch (err) { showCustomAlert("خطأ", "خطأ أثناء الحفظ بالسيرفر!", 'error'); }
+    const rawToken = studentId.trim();
+    const nowMs = Date.now();
+
+    let cleanId = rawToken;
+    let tokenTimestamp = nowMs;
+
+    if (rawToken.includes('_SEC_')) {
+        const parts = rawToken.split('_SEC_');
+        cleanId = parts[0];
+        if (parts[1]) tokenTimestamp = parts[1];
+    }
+
+    if (cleanId === lastScannedStudentId && (nowMs - lastScanTimestamp) < 30000) {
+        return;
+    }
+
+    isProcessingScan = true;
+    lastScannedStudentId = cleanId;
+    lastScanTimestamp = nowMs;
+
+    const resultCard = document.getElementById('resultCard');
+    const resultIcon = document.getElementById('resultIcon');
+    const resultTitle = document.getElementById('resultTitle');
+    const resultDetail = document.getElementById('resultDetail');
+    const resultBadge = document.getElementById('resultBadge');
+
+    try {
+        // 1. جلب بيانات الطالب الرئيسية
+        const studentDoc = await db.collection("students").doc(cleanId).get();
+        resultCard.style.display = 'block';
+
+        if (studentDoc.exists) {
+            const mainData = studentDoc.data();
+
+            // 2. جلب بيانات الترم النشط من الـ Sub-collection
+            const semSnap = await db.collection("students").doc(cleanId).collection("semesters").doc(currentSemester).get();
+
+            if (!semSnap.exists) {
+                playSound(150, null, 'sawtooth');
+                resultCard.className = 'result-card danger';
+                resultIcon.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i>';
+                resultTitle.innerText = mainData.name || cleanId;
+                resultDetail.innerText = `الكود: ${cleanId}`;
+                resultBadge.style.background = '#ef4444';
+                resultBadge.innerText = `غير مشترك في (${currentSemester})!`;
+            } else {
+                const data = semSnap.data();
+                const total = Number(data.feeTotal) || 0;
+                const paid = Number(data.feePaid) || 0;
+                const discount = Number(data.feeDiscount) || 0;
+                const remaining = Math.max(0, (total - discount) - paid);
+
+                let isBlockedDue = false;
+                if (remaining > 0 && data.dueDate) {
+                    const today = new Date();
+                    today.setHours(0,0,0,0);
+                    const dueDateObj = new Date(data.dueDate);
+                    dueDateObj.setHours(0,0,0,0);
+                    const diffDays = Math.ceil((today.getTime() - dueDateObj.getTime()) / (1000 * 3600 * 24));
+                    if (diffDays > 3) isBlockedDue = true;
+                }
+
+                if (isBlockedDue) {
+                    playSound(150, null, 'sawtooth');
+                    resultCard.className = 'result-card danger';
+                    resultIcon.innerHTML = '<i class="fa-solid fa-lock" style="color:var(--danger)"></i>';
+                    resultTitle.innerText = mainData.name;
+                    resultDetail.innerText = `الكود: ${cleanId} (تجاوز فترة السماح وباقي ${remaining} ج.م)`;
+                    resultBadge.style.background = '#ef4444';
+                    resultBadge.innerText = 'الكارت مغلق لتجاوز المستحقات!';
+                } else if (data.status !== 'مفعل') {
+                    playSound(150, null, 'sawtooth');
+                    resultCard.className = 'result-card danger';
+                    resultIcon.innerHTML = '<i class="fa-solid fa-circle-xmark" style="color:var(--danger)"></i>';
+                    resultTitle.innerText = mainData.name;
+                    resultDetail.innerText = `الكود: ${cleanId}`;
+                    resultBadge.style.background = '#ef4444';
+                    resultBadge.innerText = 'الاشتراك موقوف!';
+                } else {
+                    const now = new Date();
+                    const tripDirection = document.getElementById('tripDirectionSelect').value;
+                    const timeStr = now.toLocaleTimeString('ar-EG');
+
+                    playSound(587.33, 880);
+                    resultCard.className = 'result-card success';
+                    resultIcon.innerHTML = '<i class="fa-solid fa-circle-check" style="color:var(--success)"></i>';
+                    resultTitle.innerText = mainData.name;
+                    resultDetail.innerText = `الكود: ${cleanId} | صعود حافلة رقم: ${currentBusNumber || "عام"}\n(${tripDirection})`;
+                    resultBadge.style.background = '#10b981';
+                    resultBadge.innerText = `اشتراك مفعل - تم تسجيل الصعود وإرسال الإشعار آلياً`;
+
+                    const uniqueTripId = `${cleanId}_RIDE_${tokenTimestamp}`;
+
+                    await db.collection("attendance").doc(uniqueTripId).set({
+                        studentId: cleanId,
+                        studentName: mainData.name,
+                        parentPhone: mainData.parentPhone || "",
+                        busNumber: currentBusNumber || "غير محدد",
+                        tripDirection: tripDirection,
+                        tripType: "حضور 🚌",
+                        semester: currentSemester,
+                        timeString: timeStr,
+                        dateString: todayStr,
+                        rawTime: nowMs,
+                        serverTime: firebase.firestore.FieldValue.serverTimestamp()
+                    }, { merge: true });
+                }
+            }
+        } else {
+            playSound(150, null, 'sawtooth');
+            resultCard.className = 'result-card danger';
+            resultIcon.innerHTML = '<i class="fa-solid fa-triangle-exclamation" style="color:var(--danger)"></i>';
+            resultTitle.innerText = "غير مسجل!";
+            resultDetail.innerText = `الكود (${cleanId}) غير موجود بالقاعدة`;
+            resultBadge.style.background = '#ef4444';
+            resultBadge.innerText = 'بطاقة مرفوضة';
         }
+    } catch (err) { 
+        console.error(err);
+        showCustomAlert("خطأ", "حدث خطأ أثناء الاتصال بالسيرفر!", 'error'); 
+    }
 
-        async function toggleStatus(id, currentStatus) {
+    setTimeout(() => { isProcessingScan = false; }, 3000);
+}
+     async function toggleStatus(id, currentStatus) {
             try {
                 const targetStatus = currentStatus === 'مفعل' ? 'موقف' : 'مفعل';
                 await db.collection("students").doc(id).set({ status: targetStatus }, { merge: true });
