@@ -2191,29 +2191,35 @@
     } else {
         alert("البريد الإلكتروني أو كلمة المرور غير صحيحة!");
     }
+}// دالة فتح الواتساب للدعم الفني
+function openWhatsAppSupport(customMessage = '') {
+    const whatsappPhone = "201229804512";
+    const defaultText = customMessage || "مرحباً، أحتاج إلى استفسار/دعم فني بخصوص منظومة Masar Bus System.";
+    const whatsappUrl = `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(defaultText)}`;
+    
+    window.open(whatsappUrl, '_blank');
 }
-async function createNewAdminFromPanel() {
+
+// دالة إنشاء الأدمن المربوطة بالواتساب للخدمة المدفوعة
+function createNewAdminFromPanel() {
     const email = document.getElementById('newAdminEmailInput').value.trim();
     const pass = document.getElementById('newAdminPassInput').value.trim();
 
-    if (!email || !pass) {
-        return showCustomAlert("تنبيه", "يرجى كتابة البريد الإلكتروني وكلمة المرور!", 'warning');
+    if (!email || pass.length < 6) {
+        return showCustomAlert('تنبيه', 'يرجى إدخال بريد إلكتروني صحيح وكلمة مرور لا تقل عن 6 أحرف أولاً!', 'warning');
     }
 
-    if (pass.length < 6) {
-        return showCustomAlert("كلمة مرور ضعيفة", "يجب أن تكون كلمة المرور 6 أحرف أو أرقام على الأقل!", 'warning');
-    }
+    const msg = `مرحباً، أرغب في تفعيل وتأكيد طلب إضافة حساب أدمن جديد للمنظومة للبريد: (${email})`;
 
-    try {
-        // 1. إنشاء تطبيق فرعي مؤقت لإنشاء حساب Auth دون تسجيل خروج الأدمن الحالي
-        let secondaryApp;
-        if (!firebase.apps.some(app => app.name === "SecondaryApp")) {
-            secondaryApp = firebase.initializeApp(firebaseConfig, "SecondaryApp");
-        } else {
-            secondaryApp = firebase.app("SecondaryApp");
+    showCustomConfirm(
+        "إجراء مدفوع ⚠️",
+        `إضافة وتفعيل حساب أدمن جديد هي خدمة مدفوعة.\n\nللإتمام والتفعيل، يرجى التواصل مع الدعم الفني عبر الواتساب على الرقم:\n01229804512`,
+        () => {
+            openWhatsAppSupport(msg);
         }
-
-        // 2. إنشاء المستخدم في Firebase Auth عبر التطبيق الفرعي
+    );
+}
+     // 2. إنشاء المستخدم في Firebase Auth عبر التطبيق الفرعي
         const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
         const newAdminUser = userCredential.user;
 
@@ -2244,7 +2250,8 @@ async function createNewAdminFromPanel() {
         }
         showCustomAlert("خطأ في الإنشاء", errorMsg, 'error');
     }
-}        // دالة تغيير كلمة سر الأدمن المُعدلة كلياً بعد حسم التعارض
+}        
+     // دالة تغيير كلمة سر الأدمن المُعدلة كلياً بعد حسم التعارض
         async function changeAdminPassword() {
             const oldPass = document.getElementById('oldAdminPassInput').value.trim();
             const newPass = document.getElementById('changeAdminNewPassInput').value.trim();
