@@ -3108,6 +3108,11 @@ async function sendTechnicalReport() {
 </script>
 
 
+<!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
+<button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
+  📲 تثبيت تطبيق Masar Bus System على الشاشة
+</button>
+
 <!-- زر الدعم والتواصل العائم -->
 <div id="supportFloatingBtn" onclick="toggleSupportModal()" style="position: fixed; bottom: 80px; left: 20px; z-index: 9998; background: linear-gradient(135deg, #25D366, #128C7E); color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4); cursor: pointer; transition: all 0.3s ease;">
     <i class="fa-brands fa-whatsapp" style="font-size: 2rem;"></i>
@@ -3146,38 +3151,114 @@ async function sendTechnicalReport() {
     </div>
 </div>
 
-<!-- كود السكريبت التشغيلي -->
+<!-- البرمجيات الرئيسية -->
 <script>
-    // دالة فتح وإغلاق النافذة
-    function toggleSupportModal() {
-        const modal = document.getElementById('supportModal');
-        if (modal.style.display === 'none' || modal.style.display === '') {
-            modal.style.display = 'flex';
-        } else {
-            modal.style.display = 'none';
-        }
-    }
+  // 1. إدارة نافذة الدعم
+  function toggleSupportModal() {
+      const modal = document.getElementById('supportModal');
+      if (modal) {
+          modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+      }
+  }
 
-    // دالة إرسال البلاغ الفني عبر الواتساب تلقائياً
-    function sendTechnicalReport() {
-        const name = document.getElementById('reportSenderName').value.trim();
-        const message = document.getElementById('reportMessageText').value.trim();
+  // 2. إرسال البلاغ الفني إلى Firebase
+  async function sendTechnicalReport() {
+      const sender = document.getElementById('reportSenderName').value.trim();
+      const msg = document.getElementById('reportMessageText').value.trim();
 
-        if (!name || !message) {
-            alert('يرجى كتابة الاسم وتفاصيل المشكلة قبل الإرسال.');
-            return;
-        }
+      if (!msg) {
+          if (typeof showCustomAlert === 'function') {
+              showCustomAlert("تنبيه", "يرجى كتابة تفاصيل المشكلة قبل الإرسال!", "warning");
+          } else {
+              alert("يرجى كتابة تفاصيل المشكلة قبل الإرسال!");
+          }
+          return;
+      }
 
-        const fullText = `بلاغ عن مشكلة فنية:\nالاسم/الهاتف: ${name}\nالمشكلة: ${message}`;
-        const whatsappUrl = `https://wa.me/201229804512?text=${encodeURIComponent(fullText)}`;
-        
-        window.open(whatsappUrl, '_blank');
-        
-        // تفريغ الحقول وإغلاق النافذة
-        document.getElementById('reportSenderName').value = '';
-        document.getElementById('reportMessageText').value = '';
-        toggleSupportModal();
-    }
+      try {
+          await db.collection("reports").add({
+              sender: sender || "غير محدد",
+              message: msg,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              dateString: new Date().toLocaleDateString('en-CA')
+          });
+
+          document.getElementById('reportSenderName').value = '';
+          document.getElementById('reportMessageText').value = '';
+
+          if (typeof showCustomAlert === 'function') {
+              showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
+          } else {
+              alert("تم إرسال البلاغ الفني بنجاح!");
+          }
+          
+          toggleSupportModal();
+      } catch(e) {
+          console.error("Report send error:", e);
+          if (typeof showCustomAlert === 'function') {
+              showCustomAlert("خطأ", "تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!", "error");
+          } else {
+              alert("تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!");
+          }
+      }
+  }
+
+  // 3. حماية الكود ومنع DevTools
+  window.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+  }, true);
+
+  window.addEventListener('keydown', function (e) {
+      if (e.keyCode === 123 || 
+         (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+         (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
+          e.preventDefault();
+          return false;
+      }
+  }, true);
+
+  document.addEventListener('selectstart', function(e) { e.preventDefault(); });
+  document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+
+  (function () {
+      function blockDevTools() {
+          const startTime = performance.now();
+          debugger;
+          const endTime = performance.now();
+          
+          if (endTime - startTime > 100) {
+              document.body.innerHTML = `
+                  <div style="background:#0f172a; color:#ef4444; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; text-align:center; padding:20px;">
+                      <h1 style="font-size:2rem; margin-bottom:10px;">⚠️ تنبيه أمني</h1>
+                      <p style="font-size:1.1rem; color:#94a3b8;">تم كشف محاولة فتح أدوات التطوير (DevTools). تم إغلاق الجلسة لحماية المنظومة.</p>
+                      <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#4f46e5; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">إعادة تحميل الصفحة</button>
+                  </div>
+              `;
+          }
+      }
+      setInterval(blockDevTools, 1000);
+  })();
+
+  // 4. تثبيت التطبيق PWA
+  let deferredPrompt;
+  const installBtn = document.getElementById('installApp');
+  window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+      installBtn.addEventListener('click', () => {
+          installBtn.style.display = 'none';
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+              if (choiceResult.outcome === 'accepted') {
+                  console.log('User accepted the install prompt');
+              }
+              deferredPrompt = null;
+          });
+      });
+  });
 </script>
 </body>
 </html>
