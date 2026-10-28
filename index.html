@@ -1116,7 +1116,7 @@
 
     <script>
        const firebaseConfig = {
-  apiKey: "AIzaSyDy242R0-0UHcbcX8sdKtnuQ0PLze1GYmg",
+  apiKey: "AIzaSyAxVJxe175rRaCE8FNqT1fpfWP3vXWOabU",
   authDomain: "masar-demo-bus-sys.firebaseapp.com",
   projectId: "masar-demo-bus-sys",
   storageBucket: "masar-demo-bus-sys.firebasestorage.app",
@@ -3085,7 +3085,31 @@ async function sendTechnicalReport() {
     </script>
 <!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
 <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
-    📲 تثبيت تطبيق Masar Bus System على الشاشة
+  📲 تثبيت تطبيق  Masar Bus System على الشاشة
+</button>
+<script>
+  let deferredPrompt;
+  const installBtn = document.getElementById('installApp');
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault();
+    deferredPrompt = e;
+    installBtn.style.display = 'block';
+    installBtn.addEventListener('click', () => {
+      installBtn.style.display = 'none';
+      deferredPrompt.prompt();
+      deferredPrompt.userChoice.then((choiceResult) => {
+        if (choiceResult.outcome === 'accepted') {
+          console.log('User accepted the install prompt');
+        }
+        deferredPrompt = null;
+      });
+    });
+  });
+</script>
+
+<!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
+<button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
+  📲 تثبيت تطبيق Masar Bus System على الشاشة
 </button>
 
 <!-- زر الدعم والتواصل العائم -->
@@ -3117,7 +3141,7 @@ async function sendTechnicalReport() {
             <label style="font-size: 0.8rem; color: var(--text-muted, #a1a5b7); display: block; margin-bottom: 5px;"><i class="fa-solid fa-bug"></i> إرسال بلاغ عن مشكلة فنية:</label>
             <input type="text" id="reportSenderName" class="input-box" placeholder="اسمك أو رقم الهاتف" style="width: 100%; box-sizing: border-box; margin-bottom: 8px; font-size: 0.85rem; padding: 10px; border-radius: 6px; border: 1px solid #323248; background: #151521; color: white;">
             <textarea id="reportMessageText" class="input-box" placeholder="اكتب تفاصيل المشكلة الفنية هنا..." style="width: 100%; box-sizing: border-box; height: 80px; font-size: 0.85rem; padding: 10px; resize: none; margin-bottom: 10px; border-radius: 6px; border: 1px solid #323248; background: #151521; color: white;"></textarea>
-            <button class="btn-submit" onclick="sendTechnicalReport(event)" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 6px; padding: 10px; cursor: pointer;">
+            <button class="btn-submit" onclick="sendTechnicalReport()" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 6px; padding: 10px; cursor: pointer;">
                 <i class="fa-solid fa-paper-plane"></i> إرسال البلاغ الفني
             </button>
         </div>
@@ -3125,122 +3149,115 @@ async function sendTechnicalReport() {
         <button class="btn-submit" onclick="toggleSupportModal()" style="width: 100%; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 6px; margin-top: 10px; padding: 8px; cursor: pointer;">إغلاق</button>
     </div>
 </div>
+
+<!-- البرمجيات الرئيسية -->
 <script>
-   <script>
-// 1. إدارة نافذة الدعم
-function toggleSupportModal() {
-    var modal = document.getElementById('supportModal');
-    if (modal) {
-        modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
-    }
-}
+  // 1. إدارة نافذة الدعم
+  function toggleSupportModal() {
+      const modal = document.getElementById('supportModal');
+      if (modal) {
+          modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+      }
+  }
 
-// 2. إرسال البلاغ الفني إلى Firebase
-async function sendTechnicalReport(e) {
-    if (e && e.preventDefault) e.preventDefault();
-    var senderInput = document.getElementById('reportSenderName');
-    var msgInput = document.getElementById('reportMessageText');
+  // 2. إرسال البلاغ الفني إلى Firebase
+  async function sendTechnicalReport() {
+      const sender = document.getElementById('reportSenderName').value.trim();
+      const msg = document.getElementById('reportMessageText').value.trim();
 
-    var sender = senderInput ? senderInput.value.trim() : '';
-    var msg = msgInput ? msgInput.value.trim() : '';
+      if (!msg) {
+          if (typeof showCustomAlert === 'function') {
+              showCustomAlert("تنبيه", "يرجى كتابة تفاصيل المشكلة قبل الإرسال!", "warning");
+          } else {
+              alert("يرجى كتابة تفاصيل المشكلة قبل الإرسال!");
+          }
+          return;
+      }
 
-    if (!msg) {
-        if (typeof showCustomAlert === 'function') {
-            showCustomAlert("تنبيه", "يرجى كتابة تفاصيل المشكلة قبل الإرسال!", "warning");
-        } else {
-            alert("يرجى كتابة تفاصيل المشكلة قبل الإرسال!");
-        }
-        return;
-    }
+      try {
+          await db.collection("reports").add({
+              sender: sender || "غير محدد",
+              message: msg,
+              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+              dateString: new Date().toLocaleDateString('en-CA')
+          });
 
-    try {
-        if (typeof db === 'undefined' || !db.collection) {
-            throw new Error("اتصال قاعدة البيانات غير معرّف!");
-        }
+          document.getElementById('reportSenderName').value = '';
+          document.getElementById('reportMessageText').value = '';
 
-        await db.collection("reports").add({
-            sender: sender || "غير محدد",
-            message: msg,
-            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-            dateString: new Date().toLocaleDateString('en-CA'),
-            status: "new"
-        });
+          if (typeof showCustomAlert === 'function') {
+              showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
+          } else {
+              alert("تم إرسال البلاغ الفني بنجاح!");
+          }
+          
+          toggleSupportModal();
+      } catch(e) {
+          console.error("Report send error:", e);
+          if (typeof showCustomAlert === 'function') {
+              showCustomAlert("خطأ", "تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!", "error");
+          } else {
+              alert("تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!");
+          }
+      }
+  }
 
-        if (senderInput) senderInput.value = '';
-        if (msgInput) msgInput.value = '';
+  // 3. حماية الكود ومنع DevTools
+  window.addEventListener('contextmenu', function (e) {
+      e.preventDefault();
+      e.stopPropagation();
+      return false;
+  }, true);
 
-        if (typeof showCustomAlert === 'function') {
-            showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
-        } else {
-            alert("تم إرسال البلاغ الفني بنجاح!");
-        }
+  window.addEventListener('keydown', function (e) {
+      if (e.keyCode === 123 || 
+         (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+         (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
+          e.preventDefault();
+          return false;
+      }
+  }, true);
 
-        toggleSupportModal();
-    } catch(err) {
-        console.error("Report send error:", err);
-        if (typeof showCustomAlert === 'function') {
-            showCustomAlert("خطأ", "تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!", "error");
-        } else {
-            alert("تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!");
-        }
-    }
-}
-   // 3. حماية الكود ومنع DevTools
-window.addEventListener('contextmenu', function (e) {
-    e.preventDefault();
-    e.stopPropagation();
-    return false;
-}, true);
+  document.addEventListener('selectstart', function(e) { e.preventDefault(); });
+  document.addEventListener('dragstart', function(e) { e.preventDefault(); });
 
-window.addEventListener('keydown', function (e) {
-    if (e.keyCode === 123 || 
-       (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
-       (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
-        e.preventDefault();
-        return false;
-    }
-}, true);
+  (function () {
+      function blockDevTools() {
+          const startTime = performance.now();
+          debugger;
+          const endTime = performance.now();
+          
+          if (endTime - startTime > 100) {
+              document.body.innerHTML = `
+                  <div style="background:#0f172a; color:#ef4444; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; text-align:center; padding:20px;">
+                      <h1 style="font-size:2rem; margin-bottom:10px;">⚠️ تنبيه أمني</h1>
+                      <p style="font-size:1.1rem; color:#94a3b8;">تم كشف محاولة فتح أدوات التطوير (DevTools). تم إغلاق الجلسة لحماية المنظومة.</p>
+                      <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#4f46e5; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">إعادة تحميل الصفحة</button>
+                  </div>
+              `;
+          }
+      }
+      setInterval(blockDevTools, 1000);
+  })();
 
-document.addEventListener('selectstart', function(e) { e.preventDefault(); });
-document.addEventListener('dragstart', function(e) { e.preventDefault(); });
-
-(function () {
-    function blockDevTools() {
-        var startTime = performance.now();
-        debugger;
-        var endTime = performance.now();
-        
-        if (endTime - startTime > 100) {
-            document.body.innerHTML = '<div style="background:#0f172a; color:#ef4444; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; text-align:center; padding:20px;"><h1 style="font-size:2rem; margin-bottom:10px;">⚠️ تنبيه أمني</h1><p style="font-size:1.1rem; color:#94a3b8;">تم كشف محاولة فتح أدوات التطوير (DevTools). تم إغلاق الجلسة لحماية المنظومة.</p><button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#4f46e5; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">إعادة تحميل الصفحة</button></div>';
-        }
-    }
-    setInterval(blockDevTools, 1000);
-})();
-
-// 4. تثبيت التطبيق PWA
-var deferredPrompt;
-var installBtn = document.getElementById('installApp');
-
-window.addEventListener('beforeinstallprompt', function(e) {
-    e.preventDefault();
-    deferredPrompt = e;
-    if (installBtn) installBtn.style.display = 'block';
-});
-
-if (installBtn) {
-    installBtn.addEventListener('click', function() {
-        if (deferredPrompt) {
-            installBtn.style.display = 'none';
-            deferredPrompt.prompt();
-            deferredPrompt.userChoice.then(function(choiceResult) {
-                if (choiceResult.outcome === 'accepted') {
-                    console.log('User accepted the install prompt');
-                }
-                deferredPrompt = null;
-            });
-        }
-    });
-}
+  // 4. تثبيت التطبيق PWA
+  let deferredPrompt;
+  const installBtn = document.getElementById('installApp');
+  window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+      installBtn.style.display = 'block';
+      installBtn.addEventListener('click', () => {
+          installBtn.style.display = 'none';
+          deferredPrompt.prompt();
+          deferredPrompt.userChoice.then((choiceResult) => {
+              if (choiceResult.outcome === 'accepted') {
+                  console.log('User accepted the install prompt');
+              }
+              deferredPrompt = null;
+          });
+      });
+  });
 </script>
 </body>
 </html>
