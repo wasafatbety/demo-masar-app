@@ -3185,68 +3185,62 @@ async function sendTechnicalReport(e) {
         }
     }
 }
-    // 3. حماية الكود ومنع DevTools
-    window.addEventListener('contextmenu', function (e) {
+   // 3. حماية الكود ومنع DevTools
+window.addEventListener('contextmenu', function (e) {
+    e.preventDefault();
+    e.stopPropagation();
+    return false;
+}, true);
+
+window.addEventListener('keydown', function (e) {
+    if (e.keyCode === 123 || 
+       (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
+       (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
         e.preventDefault();
-        e.stopPropagation();
         return false;
-    }, true);
-
-    window.addEventListener('keydown', function (e) {
-        if (e.keyCode === 123 || 
-           (e.ctrlKey && e.shiftKey && (e.keyCode === 73 || e.keyCode === 74 || e.keyCode === 67)) ||
-           (e.ctrlKey && (e.keyCode === 85 || e.keyCode === 83))) {
-            e.preventDefault();
-            return false;
-        }
-    }, true);
-
-    document.addEventListener('selectstart', function(e) { e.preventDefault(); });
-    document.addEventListener('dragstart', function(e) { e.preventDefault(); });
-
-    (function () {
-        function blockDevTools() {
-            const startTime = performance.now();
-            debugger;
-            const endTime = performance.now();
-            
-            if (endTime - startTime > 100) {
-                document.body.innerHTML = `
-                    <div style="background:#0f172a; color:#ef4444; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; text-align:center; padding:20px;">
-                        <h1 style="font-size:2rem; margin-bottom:10px;">⚠️ تنبيه أمني</h1>
-                        <p style="font-size:1.1rem; color:#94a3b8;">تم كشف محاولة فتح أدوات التطوير (DevTools). تم إغلاق الجلسة لحماية المنظومة.</p>
-                        <button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#4f46e5; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">إعادة تحميل الصفحة</button>
-                    </div>
-                `;
-            }
-        }
-        setInterval(blockDevTools, 1000);
-    })();
-
-    // 4. تثبيت التطبيق PWA
-    let deferredPrompt;
-    const installBtn = document.getElementById('installApp');
-
-    window.addEventListener('beforeinstallprompt', (e) => {
-        e.preventDefault();
-        deferredPrompt = e;
-        if (installBtn) installBtn.style.display = 'block';
-    });
-
-    if (installBtn) {
-        installBtn.addEventListener('click', () => {
-            if (deferredPrompt) {
-                installBtn.style.display = 'none';
-                deferredPrompt.prompt();
-                deferredPrompt.userChoice.then((choiceResult) => {
-                    if (choiceResult.outcome === 'accepted') {
-                        console.log('User accepted the install prompt');
-                    }
-                    deferredPrompt = null;
-                });
-            }
-        });
     }
+}, true);
+
+document.addEventListener('selectstart', function(e) { e.preventDefault(); });
+document.addEventListener('dragstart', function(e) { e.preventDefault(); });
+
+(function () {
+    function blockDevTools() {
+        var startTime = performance.now();
+        debugger;
+        var endTime = performance.now();
+        
+        if (endTime - startTime > 100) {
+            document.body.innerHTML = '<div style="background:#0f172a; color:#ef4444; height:100vh; display:flex; flex-direction:column; align-items:center; justify-content:center; font-family:sans-serif; text-align:center; padding:20px;"><h1 style="font-size:2rem; margin-bottom:10px;">⚠️ تنبيه أمني</h1><p style="font-size:1.1rem; color:#94a3b8;">تم كشف محاولة فتح أدوات التطوير (DevTools). تم إغلاق الجلسة لحماية المنظومة.</p><button onclick="location.reload()" style="margin-top:20px; padding:10px 20px; background:#4f46e5; color:white; border:none; border-radius:8px; cursor:pointer; font-weight:bold;">إعادة تحميل الصفحة</button></div>';
+        }
+    }
+    setInterval(blockDevTools, 1000);
+})();
+
+// 4. تثبيت التطبيق PWA
+var deferredPrompt;
+var installBtn = document.getElementById('installApp');
+
+window.addEventListener('beforeinstallprompt', function(e) {
+    e.preventDefault();
+    deferredPrompt = e;
+    if (installBtn) installBtn.style.display = 'block';
+});
+
+if (installBtn) {
+    installBtn.addEventListener('click', function() {
+        if (deferredPrompt) {
+            installBtn.style.display = 'none';
+            deferredPrompt.prompt();
+            deferredPrompt.userChoice.then(function(choiceResult) {
+                if (choiceResult.outcome === 'accepted') {
+                    console.log('User accepted the install prompt');
+                }
+                deferredPrompt = null;
+            });
+        }
+    });
+}
 </script>
 </body>
 </html>
