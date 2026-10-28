@@ -3112,7 +3112,6 @@ async function sendTechnicalReport() {
 <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
   📲 تثبيت تطبيق Masar Bus System على الشاشة
 </button>
-
 <!-- زر الدعم والتواصل العائم -->
 <div id="supportFloatingBtn" onclick="toggleSupportModal()" style="position: fixed; bottom: 80px; left: 20px; z-index: 9998; background: linear-gradient(135deg, #25D366, #128C7E); color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4); cursor: pointer; transition: all 0.3s ease;">
     <i class="fa-brands fa-whatsapp" style="font-size: 2rem;"></i>
@@ -3151,7 +3150,7 @@ async function sendTechnicalReport() {
     </div>
 </div>
 
-<!-- البرمجيات الرئيسية -->
+<!-- السكريبت التشغيلي مغلق بالكامل -->
 <script>
   // 1. إدارة نافذة الدعم
   function toggleSupportModal() {
@@ -3163,8 +3162,10 @@ async function sendTechnicalReport() {
 
   // 2. إرسال البلاغ الفني إلى Firebase
   async function sendTechnicalReport() {
-      const sender = document.getElementById('reportSenderName').value.trim();
-      const msg = document.getElementById('reportMessageText').value.trim();
+      const senderInput = document.getElementById('reportSenderName');
+      const msgInput = document.getElementById('reportMessageText');
+      const sender = senderInput ? senderInput.value.trim() : '';
+      const msg = msgInput ? msgInput.value.trim() : '';
 
       if (!msg) {
           if (typeof showCustomAlert === 'function') {
@@ -3176,15 +3177,17 @@ async function sendTechnicalReport() {
       }
 
       try {
-          await db.collection("reports").add({
-              sender: sender || "غير محدد",
-              message: msg,
-              createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-              dateString: new Date().toLocaleDateString('en-CA')
-          });
+          if (typeof db !== 'undefined' && db.collection) {
+              await db.collection("reports").add({
+                  sender: sender || "غير محدد",
+                  message: msg,
+                  createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                  dateString: new Date().toLocaleDateString('en-CA')
+              });
+          }
 
-          document.getElementById('reportSenderName').value = '';
-          document.getElementById('reportMessageText').value = '';
+          if (senderInput) senderInput.value = '';
+          if (msgInput) msgInput.value = '';
 
           if (typeof showCustomAlert === 'function') {
               showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
@@ -3202,7 +3205,7 @@ async function sendTechnicalReport() {
           }
       }
   }
-
+</script>
   // 3. حماية الكود ومنع DevTools
   window.addEventListener('contextmenu', function (e) {
       e.preventDefault();
