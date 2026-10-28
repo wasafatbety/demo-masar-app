@@ -2204,7 +2204,40 @@ async function createNewAdminFromPanel() {
         return showCustomAlert("كلمة مرور ضعيفة", "يجب أن تكون كلمة المرور 6 أحرف أو أرقام على الأقل!", 'warning');
     }
 
+    // --- بداية الجزء المضاف للميزة المدفوعة ---
+    const phone = "201229804512"; // الرقم بصيغة دولية بدون +
+    const message = encodeURIComponent("مرحباً، أود الاستفسار عن الترقية للنسخة المدفوعة لتفعيل ميزة إنشاء وترقية حسابات الأدمن.");
+    const whatsappUrl = `https://wa.me/${phone}?text=${message}`;
+
+    // إذا كنت تستخدم SweetAlert2
+    if (typeof Swal !== 'undefined') {
+        Swal.fire({
+            title: "خاص بالنسخة المدفوعة 🚀",
+            text: "عذراً، ميزة إنشاء وترقية حسابات الأدمن متوفرة فقط في النسخة المدفوعة.",
+            icon: "info",
+            showCancelButton: true,
+            confirmButtonText: "التواصل عبر واتساب للتفعيل",
+            cancelButtonText: "إلغاء",
+            confirmButtonColor: "#25D366", // لون الواتساب
+        }).then((result) => {
+            if (result.isConfirmed) {
+                window.open(whatsappUrl, '_blank');
+            }
+        });
+        return;
+    }
+
+    // في حال عدم وجود SweetAlert2 (استخدام showCustomAlert الخاص بك مع فتح الواتساب تلقائياً)
+    showCustomAlert("خاص بالنسخة المدفوعة", "هذا الطلب متاح فقط للنسخة المدفوعة. جاري تحويلك للواتساب للتفعيل...", "info");
+    setTimeout(() => {
+        window.open(whatsappUrl, '_blank');
+    }, 1500);
+
+    return;
+    // --- نهاية الجزء المضاف ---
+
     try {
+        // كود الإنشاء الأصلي الخاص بك يكتمل هنا عند فتح النسخة مستقبلاً
         // 1. إنشاء تطبيق فرعي مؤقت لإنشاء حساب Auth دون تسجيل خروج الأدمن الحالي
         let secondaryApp;
         if (!firebase.apps.some(app => app.name === "SecondaryApp")) {
