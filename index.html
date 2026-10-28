@@ -3159,52 +3159,65 @@ async function sendTechnicalReport() {
         }
     }
 
-    // 2. إرسال البلاغ الفني إلى Firebase
-    async function sendTechnicalReport() {
-        const senderInput = document.getElementById('reportSenderName');
-        const msgInput = document.getElementById('reportMessageText');
-        const sender = senderInput ? senderInput.value.trim() : '';
-        const msg = msgInput ? msgInput.value.trim() : '';
+// 2. إرسال البلاغ الفني إلى Firebase
+async function sendTechnicalReport() {
+    const senderInput = document.getElementById('reportSenderName');
+    const msgInput = document.getElementById('reportMessageText');
+    const submitBtn = event ? event.currentTarget : null;
 
-        if (!msg) {
-            if (typeof showCustomAlert === 'function') {
-                showCustomAlert("تنبيه", "يرجى كتابة تفاصيل المشكلة قبل الإرسال!", "warning");
-            } else {
-                alert("يرجى كتابة تفاصيل المشكلة قبل الإرسال!");
-            }
-            return;
+    const sender = senderInput ? senderInput.value.trim() : '';
+    const msg = msgInput ? msgInput.value.trim() : '';
+
+    if (!msg) {
+        if (typeof showCustomAlert === 'function') {
+            showCustomAlert("تنبيه", "يرجى كتابة تفاصيل المشكلة قبل الإرسال!", "warning");
+        } else {
+            alert("يرجى كتابة تفاصيل المشكلة قبل الإرسال!");
         }
-
-        try {
-            if (typeof db !== 'undefined' && db.collection) {
-                await db.collection("reports").add({
-                    sender: sender || "غير محدد",
-                    message: msg,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    dateString: new Date().toLocaleDateString('en-CA')
-                });
-            }
-
-            if (senderInput) senderInput.value = '';
-            if (msgInput) msgInput.value = '';
-
-            if (typeof showCustomAlert === 'function') {
-                showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
-            } else {
-                alert("تم إرسال البلاغ الفني بنجاح!");
-            }
-            
-            toggleSupportModal();
-        } catch(e) {
-            console.error("Report send error:", e);
-            if (typeof showCustomAlert === 'function') {
-                showCustomAlert("خطأ", "تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!", "error");
-            } else {
-                alert("تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!");
-            }
-        }
+        return;
     }
 
+    // تعطيل الزر لتجنب الضغط المكرر أثناء الإرسال
+    if (submitBtn) submitBtn.disabled = true;
+
+    try {
+        // التحقق من وجود قاعدة البيانات
+        if (typeof db === 'undefined' || !db.collection) {
+            throw new Error("اتصال قاعدة البيانات Firebase غير معرّف أو لم يتم تهيئته بشكل صحيح!");
+        }
+
+        // الحفظ في كولكشن reports
+        await db.collection("reports").add({
+            sender: sender || "غير محدد",
+            message: msg,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            dateString: new Date().toLocaleDateString('en-CA'),
+            status: "new"
+        });
+
+        // تفريغ الحقول بعد الإرسال الناجح
+        if (senderInput) senderInput.value = '';
+        if (msgInput) msgInput.value = '';
+
+        if (typeof showCustomAlert === 'function') {
+            showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
+        } else {
+            alert("تم إرسال البلاغ الفني بنجاح!");
+        }
+
+        toggleSupportModal();
+    } catch(e) {
+        console.error("Report send error:", e);
+        if (typeof showCustomAlert === 'function') {
+            showCustomAlert("خطأ", "تعذر إرسال البلاغ: " + (e.message || "تأكد من الاتصال بالسيرفر!"), "error");
+        } else {
+            alert("تعذر إرسال البلاغ: " + (e.message || "تأكد من الاتصال بالسيرفر!"));
+        }
+    } finally {
+        // إعادة تفعيل الزر
+        if (submitBtn) submitBtn.disabled = false;
+    }
+}
     // 3. حماية الكود ومنع DevTools
     window.addEventListener('contextmenu', function (e) {
         e.preventDefault();
