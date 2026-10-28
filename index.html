@@ -3085,30 +3085,6 @@ async function sendTechnicalReport() {
     </script>
 <!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
 <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
-  📲 تثبيت تطبيق  Masar Bus System على الشاشة
-</button>
-<script>
-  let deferredPrompt;
-  const installBtn = document.getElementById('installApp');
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault();
-    deferredPrompt = e;
-    installBtn.style.display = 'block';
-    installBtn.addEventListener('click', () => {
-      installBtn.style.display = 'none';
-      deferredPrompt.prompt();
-      deferredPrompt.userChoice.then((choiceResult) => {
-        if (choiceResult.outcome === 'accepted') {
-          console.log('User accepted the install prompt');
-        }
-        deferredPrompt = null;
-      });
-    });
-  });
-</script>
-
-<!-- زر تثبيت اختياري يظهر فقط عند استيفاء شروط المتصفح -->
-<button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
     📲 تثبيت تطبيق Masar Bus System على الشاشة
 </button>
 
@@ -3141,7 +3117,7 @@ async function sendTechnicalReport() {
             <label style="font-size: 0.8rem; color: var(--text-muted, #a1a5b7); display: block; margin-bottom: 5px;"><i class="fa-solid fa-bug"></i> إرسال بلاغ عن مشكلة فنية:</label>
             <input type="text" id="reportSenderName" class="input-box" placeholder="اسمك أو رقم الهاتف" style="width: 100%; box-sizing: border-box; margin-bottom: 8px; font-size: 0.85rem; padding: 10px; border-radius: 6px; border: 1px solid #323248; background: #151521; color: white;">
             <textarea id="reportMessageText" class="input-box" placeholder="اكتب تفاصيل المشكلة الفنية هنا..." style="width: 100%; box-sizing: border-box; height: 80px; font-size: 0.85rem; padding: 10px; resize: none; margin-bottom: 10px; border-radius: 6px; border: 1px solid #323248; background: #151521; color: white;"></textarea>
-            <button class="btn-submit" onclick="sendTechnicalReport()" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 6px; padding: 10px; cursor: pointer;">
+            <button class="btn-submit" onclick="sendTechnicalReport(event)" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 6px; padding: 10px; cursor: pointer;">
                 <i class="fa-solid fa-paper-plane"></i> إرسال البلاغ الفني
             </button>
         </div>
@@ -3159,7 +3135,58 @@ async function sendTechnicalReport() {
         }
     }
 
- // 3. حماية الكود ومنع DevTools
+    // 2. إرسال البلاغ الفني إلى Firebase
+    async function sendTechnicalReport(e) {
+        if (e && e.preventDefault) e.preventDefault();
+        const senderInput = document.getElementById('reportSenderName');
+        const msgInput = document.getElementById('reportMessageText');
+
+        const sender = senderInput ? senderInput.value.trim() : '';
+        const msg = msgInput ? msgInput.value.trim() : '';
+
+        if (!msg) {
+            if (typeof showCustomAlert === 'function') {
+                showCustomAlert("تنبيه", "يرجى كتابة تفاصيل المشكلة قبل الإرسال!", "warning");
+            } else {
+                alert("يرجى كتابة تفاصيل المشكلة قبل الإرسال!");
+            }
+            return;
+        }
+
+        try {
+            if (typeof db === 'undefined' || !db.collection) {
+                throw new Error("اتصال قاعدة البيانات غير معرّف!");
+            }
+
+            await db.collection("reports").add({
+                sender: sender || "غير محدد",
+                message: msg,
+                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                dateString: new Date().toLocaleDateString('en-CA'),
+                status: "new"
+            });
+
+            if (senderInput) senderInput.value = '';
+            if (msgInput) msgInput.value = '';
+
+            if (typeof showCustomAlert === 'function') {
+                showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
+            } else {
+                alert("تم إرسال البلاغ الفني بنجاح!");
+            }
+
+            toggleSupportModal();
+        } catch(err) {
+            console.error("Report send error:", err);
+            if (typeof showCustomAlert === 'function') {
+                showCustomAlert("خطأ", "تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!", "error");
+            } else {
+                alert("تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!");
+            }
+        }
+    }
+
+    // 3. حماية الكود ومنع DevTools
     window.addEventListener('contextmenu', function (e) {
         e.preventDefault();
         e.stopPropagation();
