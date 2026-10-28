@@ -1112,15 +1112,15 @@
     </div>
 
     <script>
-        const firebaseConfig = {
-    apiKey: "AIzaSyDy242R0-0UHcbcX8sdKtnuQ0PLze1GYmg",
-    authDomain: "masar-demo-bus-sys.firebaseapp.com",
-    projectId: "masar-demo-bus-sys",
-    storageBucket: "masar-demo-bus-sys.firebasestorage.app",
-    messagingSenderId: "986322559691",
-    appId: "1:986322559691:android:da877cb5b194824c7eb14e"
+       const firebaseConfig = {
+  apiKey: "AIzaSyDy242R0-0UHcbcX8sdKtnuQ0PLze1GYmg",
+  authDomain: "masar-demo-bus-sys.firebaseapp.com",
+  projectId: "masar-demo-bus-sys",
+  storageBucket: "masar-demo-bus-sys.firebasestorage.app",
+  messagingSenderId: "986322559691",
+  appId: "1:986322559691:web:c77061c3f5f2badf7eb14e"
 };
-        firebase.initializeApp(firebaseConfig);
+     firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
         const functions = firebase.functions();
         db.enablePersistence().catch(() => console.log("Offline mode ready"));
