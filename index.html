@@ -2135,57 +2135,7 @@
             document.getElementById('exportModal').style.display = 'flex';
         }
 
-        async function authenticateAdmin() {
-            const email = document.getElementById('adminEmailInput').value.trim();
-            const pass = document.getElementById('adminPass').value.trim();
-
-            if (!email || !pass) {
-                return showCustomAlert("تنبيه", "يرجى إدخال البريد الإلكتروني وكلمة المرور!", 'warning');
-            }
-
-            try {
-                // 1. تسجيل الدخول عبر Auth
-                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, pass);
-                const user = userCredential.user;
-
-                // 2. التحقق المباشر من وجود الحساب داخل مجموعة admins في Firestore
-                const adminDoc = await db.collection("admins").doc(user.uid).get();
-
-                let isUserAdmin = false;
-
-                if (adminDoc.exists && adminDoc.data().role === "admin") {
-                    isUserAdmin = true;
-                } else if (user.email === "admin@masar.com") {
-                    isUserAdmin = true;
-                } else {
-                    const idTokenResult = await user.getIdTokenResult(true);
-                    if (idTokenResult.claims.admin) isUserAdmin = true;
-                }
-
-                if (!isUserAdmin) {
-                    await firebase.auth().signOut();
-                    return showCustomAlert("تم رفض الدخول", "هذا الحساب لا يملك صلاحية الأدمن!", 'error');
-                }
-
-                // 3. فتح لوحة التحكم بنجاح
-                document.getElementById('adminAuthCard').style.display = 'none';
-                document.getElementById('adminContent').style.display = 'block';
-                
-                document.getElementById('adminReportDate').value = todayStr;
-                currentAdminReportDate = todayStr;
-
-                loadStudentsList();
-                setupTodayAttendanceCounter();
-                setupBusesListListener();
-                
-                showCustomAlert("نجاح الدخول", "تم تسجيل الدخول بصلاحيات الإدارة المشفرة بنجاح", "success");
-
-            } catch (err) {
-                console.error(err);
-                showCustomAlert("خطأ في الدخول", "البريد الإلكتروني أو كلمة المرور غير صحيحة!", 'error');
-            }
-        }
-async function createNewAdminFromPanel() {
+        async function authenticateAdmin() {async function createNewAdminFromPanel() {
     const email = document.getElementById('newAdminEmailInput').value.trim();
     const pass = document.getElementById('newAdminPassInput').value.trim();
 
