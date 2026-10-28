@@ -3109,43 +3109,75 @@ async function sendTechnicalReport() {
 
 
 <!-- زر الدعم والتواصل العائم -->
-</script>
- <div id="supportFloatingBtn" onclick="toggleSupportModal()" style="position: fixed; bottom: 80px; left: 20px; z-index: 9998; background: linear-gradient(135deg, #25D366, #128C7E); color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4); cursor: pointer; transition: all 0.3s ease;">
+<div id="supportFloatingBtn" onclick="toggleSupportModal()" style="position: fixed; bottom: 80px; left: 20px; z-index: 9998; background: linear-gradient(135deg, #25D366, #128C7E); color: white; width: 55px; height: 55px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 8px 25px rgba(37, 211, 102, 0.4); cursor: pointer; transition: all 0.3s ease;">
     <i class="fa-brands fa-whatsapp" style="font-size: 2rem;"></i>
 </div>
 
 <!-- نافذة الدعم الفني والبلاغات المدمجة -->
-<div id="supportModal" class="modal-overlay">
-    <div class="modal-body" style="text-align: center; max-width: 420px; border-color: rgba(37, 211, 102, 0.3);">
+<div id="supportModal" class="modal-overlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.6); z-index: 9999; align-items: center; justify-content: center;">
+    <div class="modal-body" style="text-align: center; max-width: 420px; width: 90%; background: #1e1e2d; border-radius: 12px; padding: 20px; border: 1px solid rgba(37, 211, 102, 0.3); position: relative;">
         <i class="fa-solid fa-headset" style="font-size: 2.8rem; color: #25D366; margin-bottom: 8px;"></i>
         <h3 style="color: white; font-size: 1.15rem; margin-bottom: 4px;">مركز الدعم الفني والخدمات</h3>
-        <p style="color: var(--text-muted); font-size: 0.8rem; margin-bottom: 15px;">اختر وسيلة التواصل المباشر أو أرسل بلاغاً تقنياً:</p>
+        <p style="color: var(--text-muted, #a1a5b7); font-size: 0.8rem; margin-bottom: 15px;">اختر وسيلة التواصل المباشر أو أرسل بلاغاً تقنياً:</p>
 
         <!-- أزرار التواصل المباشر -->
         <div style="display: flex; gap: 8px; margin-bottom: 15px;">
-            <a href="https://wa.me/201229804512?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D8%A5%D9%84%D9%89%20%D8%AF%D8%B9%D9%85%20%D9%81%D9%86%D9%8A%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20%D9%85%D9%86%D8%B8%D9%88%D9%85%D8%A9%20%D9%85%D8%B3%D8%A7%D8%B1" target="_blank" class="btn-submit" style="background: linear-gradient(135deg, #25D366, #128C7E); text-decoration: none; flex: 1; padding: 10px; font-size: 0.85rem;">
+            <a href="https://wa.me/201229804512?text=%D9%85%D8%B1%D8%AD%D8%A8%D8%A7%D9%8B%D8%8C%20%D8%A3%D8%AD%D8%AA%D8%A7%D8%AC%20%D8%A5%D9%84%D9%89%20%D8%AF%D8%B9%D9%85%20%D9%81%D9%86%D9%8A%20%D8%A8%D8%AE%D8%B5%D9%88%D8%B5%20%D9%85%D9%86%D8%B8%D9%88%D9%85%D8%A9%20%D9%85%D8%B3%D8%A7%D8%B1" target="_blank" class="btn-submit" style="background: linear-gradient(135deg, #25D366, #128C7E); text-decoration: none; color: white; flex: 1; padding: 10px; font-size: 0.85rem; border-radius: 6px; display: inline-block;">
                 <i class="fa-brands fa-whatsapp"></i> واتساب
             </a>
-            <a href="tel:01229804512" class="btn-submit" style="background: linear-gradient(135deg, #4f46e5, #4338ca); text-decoration: none; flex: 1; padding: 10px; font-size: 0.85rem;">
+            <a href="tel:01229804512" class="btn-submit" style="background: linear-gradient(135deg, #4f46e5, #4338ca); text-decoration: none; color: white; flex: 1; padding: 10px; font-size: 0.85rem; border-radius: 6px; display: inline-block;">
                 <i class="fa-solid fa-phone"></i> اتصال
             </a>
         </div>
 
-        <hr style="border: 0; border-top: 1px solid var(--card-border); margin-bottom: 12px;">
+        <hr style="border: 0; border-top: 1px solid var(--card-border, #2b2b40); margin-bottom: 12px;">
 
         <!-- نموذج إرسال بلاغ فني -->
         <div style="text-align: right;">
-            <label style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 5px;"><i class="fa-solid fa-bug"></i> إرسال بلاغ عن مشكلة فنية:</label>
-            <input type="text" id="reportSenderName" class="input-box" placeholder="اسمك أو رقم الهاتف" style="margin-bottom: 8px; font-size: 0.85rem; padding: 10px;">
-            <textarea id="reportMessageText" class="input-box" placeholder="اكتب تفاصيل المشكلة الفنية هنا..." style="height: 80px; font-size: 0.85rem; padding: 10px; resize: none; margin-bottom: 10px;"></textarea>
-            <button class="btn-submit" onclick="sendTechnicalReport()" style="background: linear-gradient(135deg, #f59e0b, #d97706); padding: 10px;">
+            <label style="font-size: 0.8rem; color: var(--text-muted, #a1a5b7); display: block; margin-bottom: 5px;"><i class="fa-solid fa-bug"></i> إرسال بلاغ عن مشكلة فنية:</label>
+            <input type="text" id="reportSenderName" class="input-box" placeholder="اسمك أو رقم الهاتف" style="width: 100%; box-sizing: border-box; margin-bottom: 8px; font-size: 0.85rem; padding: 10px; border-radius: 6px; border: 1px solid #323248; background: #151521; color: white;">
+            <textarea id="reportMessageText" class="input-box" placeholder="اكتب تفاصيل المشكلة الفنية هنا..." style="width: 100%; box-sizing: border-box; height: 80px; font-size: 0.85rem; padding: 10px; resize: none; margin-bottom: 10px; border-radius: 6px; border: 1px solid #323248; background: #151521; color: white;"></textarea>
+            <button class="btn-submit" onclick="sendTechnicalReport()" style="width: 100%; background: linear-gradient(135deg, #f59e0b, #d97706); color: white; border: none; border-radius: 6px; padding: 10px; cursor: pointer;">
                 <i class="fa-solid fa-paper-plane"></i> إرسال البلاغ الفني
             </button>
         </div>
 
-        <button class="btn-submit" onclick="toggleSupportModal()" style="background: rgba(255,255,255,0.1); margin-top: 10px; padding: 8px;">إغلاق</button>
+        <button class="btn-submit" onclick="toggleSupportModal()" style="width: 100%; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 6px; margin-top: 10px; padding: 8px; cursor: pointer;">إغلاق</button>
     </div>
 </div>
- </script>
+
+<!-- كود السكريبت التشغيلي -->
+<script>
+    // دالة فتح وإغلاق النافذة
+    function toggleSupportModal() {
+        const modal = document.getElementById('supportModal');
+        if (modal.style.display === 'none' || modal.style.display === '') {
+            modal.style.display = 'flex';
+        } else {
+            modal.style.display = 'none';
+        }
+    }
+
+    // دالة إرسال البلاغ الفني عبر الواتساب تلقائياً
+    function sendTechnicalReport() {
+        const name = document.getElementById('reportSenderName').value.trim();
+        const message = document.getElementById('reportMessageText').value.trim();
+
+        if (!name || !message) {
+            alert('يرجى كتابة الاسم وتفاصيل المشكلة قبل الإرسال.');
+            return;
+        }
+
+        const fullText = `بلاغ عن مشكلة فنية:\nالاسم/الهاتف: ${name}\nالمشكلة: ${message}`;
+        const whatsappUrl = `https://wa.me/201229804512?text=${encodeURIComponent(fullText)}`;
+        
+        window.open(whatsappUrl, '_blank');
+        
+        // تفريغ الحقول وإغلاق النافذة
+        document.getElementById('reportSenderName').value = '';
+        document.getElementById('reportMessageText').value = '';
+        toggleSupportModal();
+    }
+</script>
 </body>
 </html>
