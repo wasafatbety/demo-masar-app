@@ -2218,7 +2218,7 @@ function createNewAdminFromPanel() {
             openWhatsAppSupport(msg);
         }
     );
-
+ }
      // 2. إنشاء المستخدم في Firebase Auth عبر التطبيق الفرعي
         const userCredential = await secondaryApp.auth().createUserWithEmailAndPassword(email, pass);
         const newAdminUser = userCredential.user;
