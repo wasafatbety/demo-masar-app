@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+ <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <!-- 1. منع الفتح داخل iframe على مستوى المتصفح (Frame Busting Script) -->
@@ -7,7 +7,6 @@
       window.top.location.href = window.self.location.href;
     }
   </script>
-
   <!-- 2. وسم الـ CSP للأمان وحماية الموارد والسكريبتات -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data: blob:;
@@ -27,15 +26,15 @@
                 https://firestore.googleapis.com 
                 https://identitytoolkit.googleapis.com;
     img-src 'self' data: blob: https:;
-  ">  
+  ">
+  
+<!-- ربط ملف الـ Manifest -->
+<link rel="manifest" href="manifest.json">
 
-  <!-- ربط ملف الـ Manifest -->
-  <link rel="manifest" href="manifest.json">
-
-  <!-- تحديد لون شريط العنوان وشعار آيفون/iOS -->
-  <meta name="theme-color" content="#ffffff">
-  <link rel="apple-touch-icon" href="icon-192.png">
-
+<!-- تحديد لون شريط العنوان وشعار آيفون/iOS -->
+<meta name="theme-color" content="#ffffff">
+<link rel="apple-touch-icon" href="icon-192.png">
+  
   <!-- تسجيل الـ Service Worker -->
   <script>
     if ('serviceWorker' in navigator) {
