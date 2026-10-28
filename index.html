@@ -1112,7 +1112,7 @@
     </div>
 
     <script>
-        const firebaseConfig = {
+       const firebaseConfig = {
   apiKey: "AIzaSyDy242R0-0UHcbcX8sdKtnuQ0PLze1GYmg",
   authDomain: "masar-demo-bus-sys.firebaseapp.com",
   projectId: "masar-demo-bus-sys",
@@ -2192,58 +2192,19 @@
         alert("البريد الإلكتروني أو كلمة المرور غير صحيحة!");
     }
 }
-function createNewAdminFromPanel() {
+async function createNewAdminFromPanel() {
     const email = document.getElementById('newAdminEmailInput').value.trim();
     const pass = document.getElementById('newAdminPassInput').value.trim();
 
-    if (!email || pass.length < 6) {
-        return showCustomAlert('تنبيه', 'يرجى إدخال بريد إلكتروني صحيح وكلمة مرور لا تقل عن 6 أحرف أولاً!', 'warning');
+    if (!email || !pass) {
+        return showCustomAlert("تنبيه", "يرجى كتابة البريد الإلكتروني وكلمة المرور!", 'warning');
     }
 
-    const msg = `مرحباً، أرغب في تفعيل وتأكيد طلب إضافة حساب أدمن جديد للمنظومة للبريد: (${email})`;
-
-    showCustomConfirm(
-        "إجراء مدفوع ⚠️",
-        `إضافة وتفعيل حساب أدمن جديد هي خدمة مدفوعة.\n\nللإتمام والتفعيل، يرجى التواصل مع الدعم الفني عبر الواتساب على الرقم:\n01229804512`,
-        () => {
-            openWhatsAppSupport(msg);
-        }
-    );
-}
-
-// دالة تغيير كلمة سر الأدمن
-async function changeAdminPassword() {
-    const oldPass = document.getElementById('oldAdminPassInput').value.trim();
-    const newPass = document.getElementById('changeAdminNewPassInput').value.trim();
-
-    if (!oldPass || !newPass) {
-        return showCustomAlert("تنبيه", "يرجى إدخال كلمة السر الحالية والجديدة للأدمن!", 'warning');
-    }
-
-    if (newPass.length < 6) {
-        return showCustomAlert("كلمة مرور ضعيفة", "يجب ألا تقل كلمة السر الجديدة عن 6 أحرف أو أرقام!", 'warning');
-    }
-
-    const user = firebase.auth().currentUser;
-
-    if (!user) {
-        return showCustomAlert("خطأ", "لم يتم تسجيل الدخول كـ أدمن!", 'error');
+    if (pass.length < 6) {
+        return showCustomAlert("كلمة مرور ضعيفة", "يجب أن تكون كلمة المرور 6 أحرف أو أرقام على الأقل!", 'warning');
     }
 
     try {
-        const credential = firebase.auth.EmailAuthProvider.credential(user.email, oldPass);
-        await user.reauthenticateWithCredential(credential);
-        await user.updatePassword(newPass);
-
-        document.getElementById('oldAdminPassInput').value = '';
-        document.getElementById('changeAdminNewPassInput').value = '';
-
-        showCustomAlert("نجاح التغيير", "تم تحديث كلمة سر الأدمن بنجاح!", 'success');
-    } catch (e) {
-        console.error(e);
-        showCustomAlert("خطأ", "كلمة السر الحالية غير صحيحة أو أن الجديدة ضعيفة!", 'error');
-    }
-}
         // 1. إنشاء تطبيق فرعي مؤقت لإنشاء حساب Auth دون تسجيل خروج الأدمن الحالي
         let secondaryApp;
         if (!firebase.apps.some(app => app.name === "SecondaryApp")) {
