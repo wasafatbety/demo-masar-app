@@ -2136,93 +2136,64 @@
         }
 
         async function authenticateAdmin() {
-            const email = document.getElementById('adminEmailInput').value.trim();
-            const pass = document.getElementById('adminPass').value.trim();
+    const emailInput = document.getElementById('adminEmailInput');
+    const passInput = document.getElementById('adminPass');
 
-            if (!email || !pass) {
-                return showCustomAlert("تنبيه", "يرجى إدخال البريد الإلكتروني وكلمة المرور!", 'warning');
-            }
+    if (!emailInput || !passInput) {
+        alert("يرجى التأكد من عناصر إدخال البريد وكلمة المرور في الصفحة!");
+        return;
+    }
 
-            const masterEmail = "masarconsys@gmail.com";
-            const masterPass = "pass123456";
+    const email = emailInput.value.trim();
+    const pass = passInput.value.trim();
 
-            // 1. التحقق المباشر من الحساب الرئيسي المعتمد
-            if (email.toLowerCase() === masterEmail.toLowerCase()) {
-                if (pass !== masterPass) {
-                    return showCustomAlert("خطأ في الدخول", "كلمة المرور غير صحيحة!", 'error');
-                }
-
-                try {
-                    // تسجيل الدخول بالحساب الموجود في Firebase Auth
-                    const userCredential = await firebase.auth().signInWithEmailAndPassword(masterEmail, masterPass);
-                    const user = userCredential.user;
-
-                    // التأكد من توثيق صلاحية الأدمن في Firestore لهذا الـ UID
-                    await db.collection("admins").doc(user.uid).set({
-                        email: masterEmail,
-                        role: "admin",
-                        updatedAt: firebase.firestore.FieldValue.serverTimestamp()
-                    }, { merge: true });
-
-                } catch (authErr) {
-                    console.warn("Auth sync warning:", authErr.message);
-                }
-
-                // فتح لوحة التحكم فوراً
-                document.getElementById('adminAuthCard').style.display = 'none';
-                document.getElementById('adminContent').style.display = 'block';
-                
-                document.getElementById('adminReportDate').value = todayStr;
-                currentAdminReportDate = todayStr;
-
-                if (typeof loadStudentsList === 'function') loadStudentsList();
-                if (typeof setupTodayAttendanceCounter === 'function') setupTodayAttendanceCounter();
-                if (typeof setupBusesListListener === 'function') setupBusesListListener();
-                
-                return showCustomAlert("نجاح الدخول", "تم تسجيل الدخول بصلاحيات الإدارة الرئيسية بنجاح", "success");
-            }
-
-            // 2. تسجيل دخول بقية حسابات الأدمن الفرعية عبر Firebase Auth
-            try {
-                const userCredential = await firebase.auth().signInWithEmailAndPassword(email, pass);
-                const user = userCredential.user;
-
-                const adminDoc = await db.collection("admins").doc(user.uid).get();
-
-                let isUserAdmin = false;
-
-                if (adminDoc.exists && adminDoc.data().role === "admin") {
-                    isUserAdmin = true;
-                } else if (user.email === "admin@masar.com") {
-                    isUserAdmin = true;
-                } else {
-                    const idTokenResult = await user.getIdTokenResult(true);
-                    if (idTokenResult.claims && idTokenResult.claims.admin) isUserAdmin = true;
-                }
-
-                if (!isUserAdmin) {
-                    await firebase.auth().signOut();
-                    return showCustomAlert("تم رفض الدخول", "هذا الحساب لا يملك صلاحية الأدمن!", 'error');
-                }
-
-                document.getElementById('adminAuthCard').style.display = 'none';
-                document.getElementById('adminContent').style.display = 'block';
-                
-                document.getElementById('adminReportDate').value = todayStr;
-                currentAdminReportDate = todayStr;
-
-                if (typeof loadStudentsList === 'function') loadStudentsList();
-                if (typeof setupTodayAttendanceCounter === 'function') setupTodayAttendanceCounter();
-                if (typeof setupBusesListListener === 'function') setupBusesListListener();
-                
-                showCustomAlert("نجاح الدخول", "تم تسجيل الدخول بصلاحيات الإدارة المشفرة بنجاح", "success");
-
-            } catch (err) {
-                console.error(err);
-                showCustomAlert("خطأ في الدخول", "البريد الإلكتروني أو كلمة المرور غير صحيحة!", 'error');
-            }
+    if (!email || !pass) {
+        if (typeof showCustomAlert === 'function') {
+            showCustomAlert("تنبيه", "يرجى إدخال البريد الإلكتروني وكلمة المرور!", 'warning');
+        } else {
+            alert("يرجى إدخال البريد الإلكتروني وكلمة المرور!");
         }
-        function setupTodayAttendanceCounter() {
+        return;
+    }
+
+    // البيانات المعتمدة لفتح اللوحة
+    const masterEmail = "masarconsys@gmail.com";
+    const masterPass = "123456";
+
+    if (email.toLowerCase() === masterEmail.toLowerCase() && pass === masterPass) {
+        // 1. إخفاء كارت الدخول وإظهار اللوحة
+        const authCard = document.getElementById('adminAuthCard');
+        const adminContent = document.getElementById('adminContent');
+        
+        if (authCard) authCard.style.display = 'none';
+        if (adminContent) adminContent.style.display = 'block';
+
+        // 2. ضبط التاريخ
+        const reportDateInput = document.getElementById('adminReportDate');
+        if (reportDateInput && typeof todayStr !== 'undefined') {
+            reportDateInput.value = todayStr;
+            currentAdminReportDate = todayStr;
+        }
+
+        // 3. استدعاء الدوال بشكل آمن بدون تعليق
+        try { if (typeof loadStudentsList === 'function') loadStudentsList(); } catch(e) { console.error(e); }
+        try { if (typeof setupTodayAttendanceCounter === 'function') setupTodayAttendanceCounter(); } catch(e) { console.error(e); }
+        try { if (typeof setupBusesListListener === 'function') setupBusesListListener(); } catch(e) { console.error(e); }
+
+        if (typeof showCustomAlert === 'function') {
+            showCustomAlert("نجاح الدخول", "تم فتح لوحة التحكم الرئيسية بنجاح!", "success");
+        }
+        return;
+    }
+
+    // إذا كانت البيانات غير مطابقة
+    if (typeof showCustomAlert === 'function') {
+        showCustomAlert("خطأ في الدخول", "البريد الإلكتروني أو كلمة المرور غير صحيحة!", 'error');
+    } else {
+        alert("البريد الإلكتروني أو كلمة المرور غير صحيحة!");
+    }
+}     
+     function setupTodayAttendanceCounter() {
             if (unsubscribeTodayStats) unsubscribeTodayStats();
 
             unsubscribeTodayStats = db.collection("attendance")
