@@ -3125,67 +3125,66 @@ async function sendTechnicalReport() {
         <button class="btn-submit" onclick="toggleSupportModal()" style="width: 100%; background: rgba(255,255,255,0.1); color: white; border: none; border-radius: 6px; margin-top: 10px; padding: 8px; cursor: pointer;">إغلاق</button>
     </div>
 </div>
-
 <script>
-    // 1. إدارة نافذة الدعم
-    function toggleSupportModal() {
-        const modal = document.getElementById('supportModal');
-        if (modal) {
-            modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+   <script>
+// 1. إدارة نافذة الدعم
+function toggleSupportModal() {
+    var modal = document.getElementById('supportModal');
+    if (modal) {
+        modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
+    }
+}
+
+// 2. إرسال البلاغ الفني إلى Firebase
+async function sendTechnicalReport(e) {
+    if (e && e.preventDefault) e.preventDefault();
+    var senderInput = document.getElementById('reportSenderName');
+    var msgInput = document.getElementById('reportMessageText');
+
+    var sender = senderInput ? senderInput.value.trim() : '';
+    var msg = msgInput ? msgInput.value.trim() : '';
+
+    if (!msg) {
+        if (typeof showCustomAlert === 'function') {
+            showCustomAlert("تنبيه", "يرجى كتابة تفاصيل المشكلة قبل الإرسال!", "warning");
+        } else {
+            alert("يرجى كتابة تفاصيل المشكلة قبل الإرسال!");
         }
+        return;
     }
 
-    // 2. إرسال البلاغ الفني إلى Firebase
-    async function sendTechnicalReport(e) {
-        if (e && e.preventDefault) e.preventDefault();
-        const senderInput = document.getElementById('reportSenderName');
-        const msgInput = document.getElementById('reportMessageText');
-
-        const sender = senderInput ? senderInput.value.trim() : '';
-        const msg = msgInput ? msgInput.value.trim() : '';
-
-        if (!msg) {
-            if (typeof showCustomAlert === 'function') {
-                showCustomAlert("تنبيه", "يرجى كتابة تفاصيل المشكلة قبل الإرسال!", "warning");
-            } else {
-                alert("يرجى كتابة تفاصيل المشكلة قبل الإرسال!");
-            }
-            return;
+    try {
+        if (typeof db === 'undefined' || !db.collection) {
+            throw new Error("اتصال قاعدة البيانات غير معرّف!");
         }
 
-        try {
-            if (typeof db === 'undefined' || !db.collection) {
-                throw new Error("اتصال قاعدة البيانات غير معرّف!");
-            }
+        await db.collection("reports").add({
+            sender: sender || "غير محدد",
+            message: msg,
+            createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+            dateString: new Date().toLocaleDateString('en-CA'),
+            status: "new"
+        });
 
-            await db.collection("reports").add({
-                sender: sender || "غير محدد",
-                message: msg,
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                dateString: new Date().toLocaleDateString('en-CA'),
-                status: "new"
-            });
+        if (senderInput) senderInput.value = '';
+        if (msgInput) msgInput.value = '';
 
-            if (senderInput) senderInput.value = '';
-            if (msgInput) msgInput.value = '';
+        if (typeof showCustomAlert === 'function') {
+            showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
+        } else {
+            alert("تم إرسال البلاغ الفني بنجاح!");
+        }
 
-            if (typeof showCustomAlert === 'function') {
-                showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
-            } else {
-                alert("تم إرسال البلاغ الفني بنجاح!");
-            }
-
-            toggleSupportModal();
-        } catch(err) {
-            console.error("Report send error:", err);
-            if (typeof showCustomAlert === 'function') {
-                showCustomAlert("خطأ", "تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!", "error");
-            } else {
-                alert("تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!");
-            }
+        toggleSupportModal();
+    } catch(err) {
+        console.error("Report send error:", err);
+        if (typeof showCustomAlert === 'function') {
+            showCustomAlert("خطأ", "تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!", "error");
+        } else {
+            alert("تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!");
         }
     }
-
+}
     // 3. حماية الكود ومنع DevTools
     window.addEventListener('contextmenu', function (e) {
         e.preventDefault();
