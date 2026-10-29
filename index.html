@@ -1134,13 +1134,6 @@
     <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
         📲 تثبيت تطبيق Masar Bus System على الشاشة
     </button>
-<!-- ==================== 1. مكتبة EmailJS وتهيئة المفتاح ==================== -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script type="text/javascript">
-   (function(){
-      emailjs.init("Gn4QPvQG68ewJftky");
-   })();
-</script>
 
 <!-- ==================== 2. الواجهة (HTML) ==================== -->
 <!-- زر الدعم والتواصل العائم -->
@@ -3073,40 +3066,7 @@ ${downloadUrl}
             }
         }
 
-        function toggleSupportModal() {
-            const modal = document.getElementById('supportModal');
-            if (modal) {
-                modal.style.display = (modal.style.display === 'flex') ? 'none' : 'flex';
-            }
-        }
-
-        async function sendTechnicalReport() {
-            const sender = document.getElementById('reportSenderName').value.trim();
-            const msg = document.getElementById('reportMessageText').value.trim();
-
-            if (!msg) {
-                return showCustomAlert("تنبيه", "يرجى كتابة تفاصيل المشكلة قبل الإرسال!", "warning");
-            }
-
-            try {
-                await db.collection("reports").add({
-                    sender: sender || "غير محدد",
-                    message: msg,
-                    createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                    dateString: new Date().toLocaleDateString('en-CA')
-                });
-
-                document.getElementById('reportSenderName').value = '';
-                document.getElementById('reportMessageText').value = '';
-                
-                showCustomAlert("تم الإرسال", "تم إرسال البلاغ الفني بنجاح للمطوّر وسيتم مراجعته فوراً!", "success");
-                toggleSupportModal();
-            } catch(e) {
-                showCustomAlert("خطأ", "تعذر إرسال البلاغ، تأكد من الاتصال بالسيرفر!", "error");
-            }
-        }
-
-        // حماية الكود وتثبيت التطبيق
+              // حماية الكود وتثبيت التطبيق
         window.addEventListener('contextmenu', function (e) {
             e.preventDefault();
             e.stopPropagation();
