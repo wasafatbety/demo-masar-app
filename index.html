@@ -2702,7 +2702,6 @@
                 container.appendChild(card);
             });
         }
-<!-- 1. بداية وسم السكريبت -->
        async function addNewStudent() {
     // قراءة القيم باستخدام المعرفات (IDs) الصحيحة في HTML
     const studentId = document.getElementById('newStudentId').value.trim();
@@ -2765,9 +2764,7 @@
         console.error("خطأ أثناء إضافة الطالب:", error);
         alert("حدث خطأ أثناء حفظ البيانات: " + error.message);
     }
-}
-  
-    <!-- 2. نهاية وسم السكريبت -->
+}  
      async function toggleStatus(id, currentStatus) {
             try {
                 const targetStatus = currentStatus === 'مفعل' ? 'موقف' : 'مفعل';
