@@ -1130,7 +1130,7 @@
     <button id="installApp" style="display: none; position: fixed; bottom: 20px; right: 20px; z-index: 9999; padding: 12px 20px; font-size: 0.9rem; font-weight: bold; font-family: 'Cairo', sans-serif; background: linear-gradient(135deg, #4f46e5, #4338ca); color: #ffffff; border: 1px solid rgba(255,255,255,0.2); border-radius: 12px; box-shadow: 0 8px 20px rgba(0,0,0,0.4); cursor: pointer;">
         📲 تثبيت تطبيق Masar Bus System على الشاشة
     </button>
-<!-- ==================== 1. مكتبة EmailJS وتهيئة المفتاح العامة ==================== -->
+<!-- ==================== 1. مكتبة EmailJS وتهيئة المفتاح ==================== -->
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
 <script type="text/javascript">
    (function(){
@@ -1187,7 +1187,7 @@ function toggleSupportModal() {
     }
 }
 
-// دالة معالجة وإرسال البلاغ الفني عبر Firebase و EmailJS
+// دالة معالجة وإرسال البلاغ الفني عبر Firebase و EmailJS والواتساب
 async function sendTechnicalReport() {
     const senderName = document.getElementById('reportSenderName').value.trim();
     const messageText = document.getElementById('reportMessageText').value.trim();
@@ -1226,18 +1226,26 @@ async function sendTechnicalReport() {
                 console.error('EmailJS Error:', error);
             });
 
-        // 3. التنبيه بنجاح الإرسال وتفريغ الحقول
+        // 3. فتح الواتساب تلقائياً بمحتوى البلاغ
+        const myAdminPhone = "201229804512";
+        const whatsappMsg = `🚨 *بلاغ فني جديد - Masar Bus System*\n\n` +
+                            `👤 *المرسل:* ${senderName}\n` +
+                            `📝 *التفاصيل:* ${messageText}`;
+        const whatsappUrl = `https://wa.me/${myAdminPhone}?text=${encodeURIComponent(whatsappMsg)}`;
+
+        // إظهار التنبيه وتفريغ الحقول
         if (typeof showCustomAlert === 'function') {
-            showCustomAlert("تم الإرسال بنجاح", "تم تسجيل البلاغ الفني وإشعار الإدارة فوراً عبر البريد الإلكتروني!", "success");
+            showCustomAlert("تم الإرسال بنجاح", "تم تسجيل البلاغ الفني وجاري توجيهك لتأكيده...", "success");
         } else {
-            alert("تم إرسال البلاغ الفني وإشعار الإدارة بنجاح!");
+            alert("تم تسجيل البلاغ الفني وجاري توجيهك للتأكيد!");
         }
 
         document.getElementById('reportSenderName').value = '';
         document.getElementById('reportMessageText').value = '';
 
-        // إغلاق النافذة
+        // إغلاق النافذة وفتح الواتساب
         toggleSupportModal();
+        window.open(whatsappUrl, '_blank');
 
     } catch (error) {
         console.error("خطأ أثناء إرسال البلاغ:", error);
