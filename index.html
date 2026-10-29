@@ -2702,8 +2702,7 @@
                 container.appendChild(card);
             });
         }
-       async function addNewStudent() {
-    // قراءة القيم باستخدام المعرفات (IDs) الصحيحة في HTML
+      async function addNewStudent() {
     const studentId = document.getElementById('newStudentId').value.trim();
     const name = document.getElementById('newStudentName').value.trim();
     const parentEmail = document.getElementById('newParentEmail').value.trim();
@@ -2714,23 +2713,20 @@
     const dueDate = document.getElementById('newDueDate').value;
     const status = document.getElementById('newStudentStatus').value;
 
-    // التحقق من البيانات الأساسية
     if (!studentId || !name || !parentPhone) {
-        alert("يرجى ملء البيانات الأساسية: (كود الطالب، اسم الطالب، ورقم هاتف ولي الأمر)");
+        showCustomAlert("بيانات ناقصة", "يرجى ملء البيانات الأساسية: (كود الطالب، اسم الطالب، ورقم هاتف ولي الأمر)", "error");
         return;
     }
 
     try {
         const studentRef = db.collection("students").doc(studentId);
         
-        // التحقق من عدم وجود كود الطالب مسبقاً
         const docSnap = await studentRef.get();
         if (docSnap.exists) {
-            alert("كود الطالب هذا مسجل بالفعل لـ طالب آخر!");
+            showCustomAlert("كود مكرر", "كود الطالب هذا مسجل بالفعل لـ طالب آخر!", "error");
             return;
         }
 
-        // حفظ مستند الطالب في Firestore
         await studentRef.set({
             studentId: studentId,
             name: name,
@@ -2746,9 +2742,10 @@
             updatedAt: firebase.firestore.FieldValue.serverTimestamp()
         });
 
-        alert("تمت إضافة الطالب وحفظ الملف المالي بنجاح!");
+        // رسالة نجاح احترافية داخلية
+        showCustomAlert("تم بنجاح", "تمت إضافة الطالب وحفظ الملف المالي بنجاح في المنظومة!", "success");
 
-        // تفريغ حقول الإدخال بعد النجاح
+        // تفريغ الحقول
         document.getElementById('newStudentId').value = '';
         document.getElementById('newStudentName').value = '';
         document.getElementById('newParentEmail').value = '';
@@ -2762,9 +2759,9 @@
 
     } catch (error) {
         console.error("خطأ أثناء إضافة الطالب:", error);
-        alert("حدث خطأ أثناء حفظ البيانات: " + error.message);
+        showCustomAlert("خطأ في الحفظ", "حدث خطأ أثناء حفظ البيانات: " + error.message, "error");
     }
-}  
+}
      async function toggleStatus(id, currentStatus) {
             try {
                 const targetStatus = currentStatus === 'مفعل' ? 'موقف' : 'مفعل';
