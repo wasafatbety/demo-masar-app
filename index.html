@@ -1,4 +1,4 @@
- <!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
   <!-- 1. منع الفتح داخل iframe على مستوى المتصفح (Frame Busting Script) -->
@@ -7,13 +7,15 @@
       window.top.location.href = window.self.location.href;
     }
   </script>
-  <!-- 2. وسم الـ CSP للأمان وحماية الموارد والسكريبتات -->
+
+  <!-- 2. وسم الـ CSP المحدث للأمان والسمح لـ EmailJS و jsDelivr -->
   <meta http-equiv="Content-Security-Policy" content="
     default-src 'self' data: blob:;
     script-src 'self' 'unsafe-inline' 'unsafe-eval' 
                https://cdnjs.cloudflare.com 
                https://unpkg.com 
-               https://www.gstatic.com;
+               https://www.gstatic.com
+               https://cdn.jsdelivr.net;
     style-src 'self' 'unsafe-inline' 
               https://cdnjs.cloudflare.com 
               https://fonts.googleapis.com;
@@ -24,16 +26,18 @@
                 https://*.firebaseio.com 
                 https://*.googleapis.com 
                 https://firestore.googleapis.com 
-                https://identitytoolkit.googleapis.com;
+                https://identitytoolkit.googleapis.com
+                https://api.emailjs.com;
     img-src 'self' data: blob: https:;
   ">
-  <!-- ضع هذا الكود داخل الـ <head> -->
-<script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
-<script type="text/javascript">
-   (function(){
-      emailjs.init("Gn4QPvQG68ewJftky");
-   })();
-</script>
+
+  <!-- 3. مكتبة EmailJS وتهيئة المفتاح العامة -->
+  <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@3/dist/email.min.js"></script>
+  <script type="text/javascript">
+     (function(){
+        emailjs.init("Gn4QPvQG68ewJftky");
+     })();
+  </script>
 <!-- ربط ملف الـ Manifest -->
 <link rel="manifest" href="manifest.json">
 
